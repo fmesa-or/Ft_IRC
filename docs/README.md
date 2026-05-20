@@ -30,3 +30,7 @@ Allowed Fx:	Everything in C++ 98.
 You must not develop an IRC client.
 You must not implement server-to-server communication.
 
+Must use poll()*
+Must allow multiple clients simultaneously
+Fork is prohibited!
+
