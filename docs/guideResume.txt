@@ -40,8 +40,7 @@ Must implement the commands that are specific to channel operators:
 	∗ TOPIC - Change or view the channel topic
 	∗ MODE - Change the channel’s mode:
 		· i: Set/remove Invite-only channel
-		· t: Set/remove the restrictions of the TOPIC command to channel
-		operators
+		· t: Set/remove the restrictions of the TOPIC command to channel operators
 		· k: Set/remove the channel key (password)
 		· o: Give/take channel operator privilege
 		· l: Set/remove the user limit to channel
@@ -58,3 +57,17 @@ Test example
 	Use ctrl+D to send the command in several parts: ’com’, then ’man’, then ’d\n’.
 
 	In order to process a command, you have to first aggregate the received packets in order to rebuild it.
+
+Submission and peer.evaluation
+	You are encouraged to create test programs for your project even though they will not be submitted or graded.
+
+	Your reference client will be used during the evaluation process.
+
+	During the evaluation, a brief modification of the project may occasionally be requested.
+	This could involve a minor behavior change, a few lines of code to write or rewrite, or an easy-to-add feature.
+	While this step may not be applicable to every project, you must be prepared for it if it is mentioned in the evaluation guidelines.
+	This step is meant to verify your actual understanding of a specific part of the project.
+	The modification can be performed in any development environment you choose (e.g., your usual setup),
+		and it should be feasible within a few minutes — unless a specific timeframe is defined as part of the evaluation.
+	You can, for example, be asked to make a small update to a function or script, modify a display, or adjust a data structure to store new information, etc.
+	The details (scope, target, etc.) will be specified in the evaluation guidelines and may vary from one evaluation to another for the same project.
