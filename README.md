@@ -173,7 +173,7 @@ ft_irc/
 
 ### AI Usage
 
-- Used for refine README format.
+- Used to refine the README.
 
 ---
 <!--
@@ -218,16 +218,17 @@ ft_irc/
 -->
 ---
 
-<!--
-## Notes for Development
+## Notes
 
+- docs/ content is added even though the subject does not mention it. That's for development purposes. Do NOT submit!
+<!--
 - Remember to aggregate received packets to rebuild complete commands
 - Handle commands that arrive in multiple parts (see Testing section)
 - Implement proper error codes as per RFC 1459
 - Use `poll()` instead of `select()`, `kqueue()`, or `epoll()` as specified
 - No forking allowed - use single-threaded multiplexed I/O
----
 -->
+---
 
 <div align="center">
 
