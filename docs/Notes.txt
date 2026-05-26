@@ -1,0 +1,16 @@
+Things I find interesting to build the ft_irc!
+
+Use SIGINIT and SIGQUIT to handle 'Ctrl + C' and 'ctrl + \'
+
+Ports:
+	[0 to 1023] ->		Reserved for specific services and protocols:
+							- 80 -> HTTP
+							- 21 -> FTP
+							- 22 -> SSH
+						They require administrative privileges to use.
+
+	[1024 to 49151] ->	Can be registered for specific purposes and are used by non-standard applications and services.
+
+	[49152 to 65535]->	Dynamic or private ports. Used by client applications for outgoing connections.
+						These ports are dynamically allocated by the operating system to clients when they initiate outgoing connections.
+

@@ -161,6 +161,7 @@ ft_irc/
 
 ## Resources & References
 
+- [Small IRC Server [ft_irc 42 The Network]](https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9)
 <!--
 - [RFC 1459 - Internet Relay Chat Protocol](https://tools.ietf.org/html/rfc1459)
 - [IRC Numerics Reference](https://www.irchelp.org/protocol/numeric/)
