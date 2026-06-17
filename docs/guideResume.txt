@@ -45,6 +45,8 @@ Must implement the commands that are specific to channel operators:
 		· o: Give/take channel operator privilege
 		· l: Set/remove the user limit to channel
 
+Socket: is essentially a file descriptor. A socket is an endpoint that enables two processes to communicate with each other, either on the same machine or across a network.
+
 Test example
 	Verify every possible error and issue, such as receiving partial data, low bandwidth, etc.
 
@@ -71,3 +73,4 @@ Submission and peer.evaluation
 		and it should be feasible within a few minutes — unless a specific timeframe is defined as part of the evaluation.
 	You can, for example, be asked to make a small update to a function or script, modify a display, or adjust a data structure to store new information, etc.
 	The details (scope, target, etc.) will be specified in the evaluation guidelines and may vary from one evaluation to another for the same project.
+
