@@ -7,3 +7,7 @@ Needed unitary tests to check:
 		┠─removeMember
 		┠─hasMember
 		┠─getMembers
+		┠─addOperator
+		┠─removeOperator
+		┠─isOperator
+		┖─getOperators

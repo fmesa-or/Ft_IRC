@@ -50,7 +50,7 @@ public:
 	const std::set<Client*>& getOperators() const;
 
 	/* Channel Creation Support */
-//	handleJoin();
+//	handleJoin(); // El primer usuario que crea el canal debe ser operador.
 };
 
 #endif

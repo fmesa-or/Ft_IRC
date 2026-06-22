@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/06/22 18:54:41 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/06/22 20:46:05 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,36 +56,24 @@ void addMember(Client& client) {
 	// Añadir más adelante funcionalidad para +l (limite) y +i (invitación)
 }
 
-/***************************************************************
- * Wipe a @param client from the @param _members set container *
- **************************************************************/
+/*******************************************************************
+ * Wipe out a @param client from the @param _members set container *
+ ******************************************************************/
 void removeMember(Client& client) {
+	if (hasOperator(client)) {
+		removeOperator(client);
+	}
+	
 	_members.erase(client)
 
-	// Revisar si está en operador, entonces eliminarlo también
 	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
 
-/**
+/*****************************************************************************
  * Checks if a @param client exists inside the @param _members set container *
- * Also returns how many times shows up in the container.
- * 	If apears more than once                     <to fullfil>
- */
+ ****************************************************************************/
 bool hasMember(const Client& client) const {
-	size_t	amount = _members.count(client);
-
-	switch (amount) {
-		case 0:
-			// No aparece
-			break;
-		case 1:
-			// Aparece una única vez
-			break;
-		default:
-			// Aparece más de una vez. | Gestionar objeto Cliente repetido
-	}
-
-	return amount;
+	return _members.find(client);
 }
 
 /*************************************************************
@@ -99,11 +87,52 @@ const std::set<Client*>& getMembers() const {
 	 * OPERATORS *
 	 ************/
 
+/************************************************************************
+ * Agregates a new @param client to the @param _operators set container *
+ *	only if it is already in @param _members                            *
+ * For std::pair we can use .first & .second.                           *
+ *	first	-> Iterator pointing to the new element.                    *
+ *	second	-> True if added, False if not.                             *
+ ***********************************************************************/
+void addOperator(Client& client) {
+	if (!hasMember(client)) {
+		// No puede ser añadido como operador si no existe previamente como miembro
+		return; // Puede que aquí añada un throw
+	}
 
-void addOperator(Client& client);
-void removeOperator(Client& client);
+	std::pair<std::set<Client>::iterator, bool> res = _operators.insert(client);
 
-bool isOperator(const Client& client) const;
+	if (!res.second) {
+		// Cliente ya es operador, no se ha insertado
+	}
 
+	// Revisar si .insert() puede lanzar excepciones de algún tipo
+}
 
-const std::set<Client*>& getOperators() const;
+/*********************************************************************
+ * Wipe out a @param client from the @param _operators set container *
+ *	but not from member.                                             *
+ * If @param client is the only one operator, it doesn't removes it. *
+ ********************************************************************/
+void removeOperator(Client& client) {
+	// Allways has to be at least one operator
+	if (_operators.size() > 1) {
+		_operators.erase(client);
+	} else {
+		// Mensaje: solo puede quedar uno (operador)
+	}
+}
+
+/***************************************************************************
+ * Checks if a @param client is inside the @param _operators set container *
+ **************************************************************************/
+bool isOperator(const Client& client) const {
+	return _operators.find(client);
+}
+
+/***************************************************************
+ * Returns a reference of the full @param _operators container *
+ **************************************************************/
+const std::set<Client*>& getOperators() const {
+	return _operators;
+}
