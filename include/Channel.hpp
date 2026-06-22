@@ -8,6 +8,21 @@ class Client;
 
 class Channel
 {
+private:
+
+	std::string			_name;
+	std::string			_topic;
+
+	std::set<Client*>	_members;
+	std::set<Client*>	_operators;
+
+	std::string			_key;		//+k
+	std::set<Client*>	_invited;	//+i
+
+	bool				_inviteOnly;
+	bool				_topicRestricted;
+	size_t				_userLimit;	//+l | 0 = Limitless
+
 public:
 
 	Channel();
@@ -21,7 +36,6 @@ public:
 
 	void addMember(Client& client);
 	void removeMember(Client& client);
-
 	bool hasMember(const Client& client) const;
 
 	const std::set<Client*>& getMembers() const;
@@ -35,12 +49,8 @@ public:
 
 	const std::set<Client*>& getOperators() const;
 
-private:
-
-	std::string       _name;
-
-	std::set<Client*> _members;
-	std::set<Client*> _operators;
+	/* Channel Creation Support */
+//	handleJoin();
 };
 
 #endif
