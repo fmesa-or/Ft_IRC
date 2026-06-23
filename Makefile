@@ -6,7 +6,7 @@
 #    By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/28 17:42:13 by fmesa-or          #+#    #+#              #
-#    Updated: 2026/06/22 18:10:41 by fmesa-or         ###   ########.fr        #
+#    Updated: 2026/06/23 18:34:18 by fmesa-or         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,8 @@ CLEAN = rm -f
 
 #Sources
 SRC_DIR = src
-SRC =	src/Channel.cpp
+SRC =	src/Channel.cpp \
+		src/testerPaco.cpp
 
 #Objects
 OBJ_DIR = obj
