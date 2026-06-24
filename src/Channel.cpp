@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/06/23 18:28:28 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/06/24 18:45:16 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,19 +39,9 @@ const std::string& Channel::getName() const {
 
 /**********************************************************************
  * Agregates a new @param client to the @param _members set container *
- * For std::pair we can use .first & .second.                         *
- *	first	-> Iterator pointing to the new element.                  *
- *	second	-> True if added, False if not.                           *
  *********************************************************************/
 void Channel::addMember(Client& client) {
-	std::pair<std::set<Client*>::iterator, bool> res = _members.insert(&client);
-
-	if (!res.second) {
-		// Cliente repetido, no se ha insertado
-	}
-
-	// Revisar si .insert() puede lanzar excepciones de algún tipo
-	// Añadir más adelante funcionalidad para +l (limite) y +i (invitación)
+	addContainer(client, _members);
 }
 
 /*******************************************************************
@@ -101,14 +91,7 @@ void Channel::addOperator(Client& client) {
 		// No puede ser añadido como operador si no existe previamente como miembro
 		return; // Puede que aquí añada un throw
 	}
-
-	std::pair<std::set<Client*>::iterator, bool> res = _operators.insert(&client);
-
-	if (!res.second) {
-		// Cliente ya es operador, no se ha insertado
-	}
-
-	// Revisar si .insert() puede lanzar excepciones de algún tipo
+	addContainer(client, _operators);
 }
 
 /*********************************************************************
@@ -147,3 +130,63 @@ bool Channel::isOperator(const Client& client) const {
 const std::set<Client*>& Channel::getOperators() const {
 	return _operators;
 }
+
+	/***********
+	 * INVITED *
+	 **********/
+
+/**********************************************************************
+ * Agregates a new @param client to the @param _invited set container *
+ * For std::pair we can use .first & .second.                         *
+ *	first	-> Iterator pointing to the new element.                  *
+ *	second	-> True if added, False if not.                           *
+ *********************************************************************/
+void Channel::addInvited(Client& client) {
+	addContainer(client, _invited);
+}
+
+/*******************************************************************
+ * Wipe out a @param client from the @param _invited set container *
+ ******************************************************************/
+void Channel::removeInvited(Client& client) {
+	_invited.erase(&client);
+
+	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
+}
+
+/*****************************************************************************
+ * Checks if a @param client exists inside the @param _invited set container *
+ ****************************************************************************/
+bool Channel::hasInvited(const Client& client) const {
+	std::set<Client*>::const_iterator it = _invited.find(const_cast<Client*>(&client));
+	if (it != _invited.end()) {
+		return 1;
+	}
+	return 0;
+}
+
+/*************************************************************
+ * Returns a reference of the full @param _invited container *
+ ************************************************************/
+const std::set<Client*>& Channel::getInvited() const {
+	return _invited;
+}
+
+	/*********
+	 * OTHER *
+	 ********/
+	/*
+	void	setName(std::string name);
+	void	setTopic(std::string topic);
+	void	setKey(const std::string key);
+	void	setInvitedOnly(bool inviteOnly);
+	void	setTopicRestricted(bool topicRestricted);
+	void	setUserLimit(size_t userLimit);
+
+	std::string&	getName();
+	std::string&	getTopic();
+	std::string&	getKey();
+	bool			getInvitedOnly();
+	bool			getTopicRestricted();
+	size_t			getUserLimit();*/
+

@@ -16,9 +16,12 @@ Needed unitary tests to check:
 Q: Can we have two channels with the same name?
 Needed
 	└─Channel
-		┠─Setter for
+		┠─Setter&Getter for
 		┃	┠─ _key
 		┃	┠─ _invitedOnly
 		┃	┠─ _topicRestricted
 		┃	┖─ _userLimit
 		┖─R&W _invited container
+
+# 2026/06/24
+Try to make a template for all the add, remove and has methods.

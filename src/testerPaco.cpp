@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 17:04:44 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/06/23 18:33:53 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/06/24 18:44:09 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ class Client {
  * Hide Client.hpp to use the following tests *
  *********************************************/
 int	main() {
-		
 /*
+
 	try {
 		// Constructors
 		Channel ch1;
