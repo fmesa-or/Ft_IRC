@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/06/24 18:45:16 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/06/25 18:31:07 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,10 @@ void Channel::addMember(Client& client) {
  ******************************************************************/
 void Channel::removeMember(Client& client) {
 	if (isOperator(client)) {
-		removeOperator(client);
+		removeContainer(client, _operators);
 	}
 	
-	_members.erase(&client);
+	removeContainer(client, _members);
 
 	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
@@ -61,11 +61,7 @@ void Channel::removeMember(Client& client) {
  * Checks if a @param client exists inside the @param _members set container *
  ****************************************************************************/
 bool Channel::hasMember(const Client& client) const {
-	std::set<Client*>::const_iterator it = _members.find(const_cast<Client*>(&client));
-	if (it != _members.end()) {
-		return 1;
-	}
-	return 0;
+	return hasContainer(client, _members);
 }
 
 /*************************************************************
@@ -102,11 +98,11 @@ void Channel::addOperator(Client& client) {
 void Channel::removeOperator(Client& client) {
 	// Allways has to be at least one operator
 	if (_operators.size() > 1) {
-		_operators.erase(&client);
+		removeContainer(client, _operators);
 	}
 	else if (_operators.size() == 1 && _members.size() == 1) {
-		_operators.erase(&client);
-		_members.erase(&client);
+		removeContainer(client, _operators);
+		removeContainer(client, _members);
 	}
 	else {
 		// Mensaje: solo puede quedar uno (operador)
@@ -117,11 +113,7 @@ void Channel::removeOperator(Client& client) {
  * Checks if a @param client is inside the @param _operators set container *
  **************************************************************************/
 bool Channel::isOperator(const Client& client) const {
-	std::set<Client*>::const_iterator it = _operators.find(const_cast<Client*>(&client));
-	if (it != _operators.end()) {
-		return 1;
-	}
-	return 0;
+	return hasContainer(client, _operators);
 }
 
 /***************************************************************
@@ -149,7 +141,7 @@ void Channel::addInvited(Client& client) {
  * Wipe out a @param client from the @param _invited set container *
  ******************************************************************/
 void Channel::removeInvited(Client& client) {
-	_invited.erase(&client);
+	removeContainer(client, _invited);
 
 	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
@@ -158,11 +150,7 @@ void Channel::removeInvited(Client& client) {
  * Checks if a @param client exists inside the @param _invited set container *
  ****************************************************************************/
 bool Channel::hasInvited(const Client& client) const {
-	std::set<Client*>::const_iterator it = _invited.find(const_cast<Client*>(&client));
-	if (it != _invited.end()) {
-		return 1;
-	}
-	return 0;
+	return hasContainer(client, _invited);
 }
 
 /*************************************************************
@@ -175,18 +163,55 @@ const std::set<Client*>& Channel::getInvited() const {
 	/*********
 	 * OTHER *
 	 ********/
-	/*
-	void	setName(std::string name);
-	void	setTopic(std::string topic);
-	void	setKey(const std::string key);
-	void	setInvitedOnly(bool inviteOnly);
-	void	setTopicRestricted(bool topicRestricted);
-	void	setUserLimit(size_t userLimit);
 
-	std::string&	getName();
-	std::string&	getTopic();
-	std::string&	getKey();
-	bool			getInvitedOnly();
-	bool			getTopicRestricted();
-	size_t			getUserLimit();*/
+	// SETTERS
 
+	void	Channel::setName(std::string name) {
+		_name = name;
+	}
+
+	void	Channel::setTopic(std::string topic) {
+		_topic = topic;
+	}
+
+	void	Channel::setKey(const std::string key) {
+		_key = key;
+	}
+
+	void	Channel::setInvitedOnly(bool inviteOnly) {
+		_inviteOnly = inviteOnly;
+	}
+
+	void	Channel::setTopicRestricted(bool topicRestricted) {
+		_topicRestricted = topicRestricted;
+	}
+
+	void	Channel::setUserLimit(size_t userLimit) {
+		_userLimit = userLimit;
+	}
+
+	// GETTERS
+
+	std::string&	Channel::getName() {
+		return _name;
+	}
+
+	std::string&	Channel::getTopic() {
+		return _topic;
+	}
+
+	std::string&	Channel::getKey() {
+		return _key;
+	}
+
+	bool			Channel::getInviteOnly() {
+		return _inviteOnly;
+	}
+
+	bool			Channel::getTopicRestricted() {
+		return _topicRestricted;
+	}
+
+	size_t			Channel::getUserLimit() {
+		return _userLimit;
+	}

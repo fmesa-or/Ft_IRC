@@ -13,21 +13,27 @@ class Channel
 private:
 
 	std::string			_name;
-//	std::string			_topic;
+	std::string			_topic;
 
 	std::set<Client*>	_members;
 	std::set<Client*>	_operators;
 
-//	std::string			_key;		//+k
+	std::string			_key;		//+k
 	std::set<Client*>	_invited;	//+i
 
-//	bool				_inviteOnly;
-//	bool				_topicRestricted;
-//	size_t				_userLimit;	//+l | 0 = Limitless
+	bool				_inviteOnly;
+	bool				_topicRestricted;
+	size_t				_userLimit;	//+l | 0 = Limitless
 
 	/* Templates */
 	template <typename Container>
 	void	addContainer(Client& client, Container& container);
+
+	template <typename Container>
+	void	removeContainer(Client& client, Container& container);
+
+	template <typename Container>
+	bool	hasContainer(const Client& client, Container& container) const ;
 
 public:
 
@@ -62,7 +68,7 @@ public:
 	const	std::set<Client*>&	getInvited() const;
 
 	/* Others */
-	/*void	setName(std::string name);
+	void	setName(std::string name);
 	void	setTopic(std::string topic);
 	void	setKey(const std::string key);
 	void	setInvitedOnly(bool inviteOnly);
@@ -72,10 +78,10 @@ public:
 	std::string&	getName();
 	std::string&	getTopic();
 	std::string&	getKey();
-	bool			getInvitedOnly();
+	bool			getInviteOnly();
 	bool			getTopicRestricted();
 	size_t			getUserLimit();
-*/
+
 	/* Channel Creation Support */
 //	handleJoin(); // El primer usuario que crea el canal debe ser operador.
 };

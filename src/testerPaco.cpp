@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 17:04:44 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/06/24 18:44:09 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/06/25 18:35:33 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ class Client {
  * Hide Client.hpp to use the following tests *
  *********************************************/
 int	main() {
-/*
 
+/*
 	try {
 		// Constructors
 		Channel ch1;
@@ -36,7 +36,7 @@ int	main() {
 		// Identity
 		std::cout << ch1.getName() << " | " << ch2.getName() << std::endl;
 
-		/ Membership
+		// Membership
 		std::string	name1 = "Miguel";
 		Client cliente1(name1);
 		ch1.addMember(cliente1);
@@ -62,6 +62,9 @@ int	main() {
 		ch1.removeOperator(cliente1);
 		std::cout << "ch1 members amount: " << ch1.getOperators().size() << std::endl;
 		
+		// Invited
+
+		// Others
 
 	}
 	catch(const std::exception& ex) {
