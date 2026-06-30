@@ -25,7 +25,7 @@ CLEAN = rm -f
 
 #Sources
 SRC_DIR = src
-SRC =	src/
+SRC = src/*
 
 #Objects
 OBJ_DIR = obj
