@@ -36,7 +36,7 @@ public:
 
 	/* Incoming data */
 
-	std::string& recvBuffer();
+	std::string& getRecvBuffer();
 
 	/* Outgoing data */
 

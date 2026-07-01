@@ -5,20 +5,21 @@
 # include <map>
 # include <vector>
 # include <sys/poll.h>
+# include <sys/types.h>
 
+# include "IRC.hpp"
 # include "Client.hpp"
 # include "Channel.hpp"
 
 class Server
 {
 public:
-
-	// WARNING: TEMP
-	void doServerStuff();
-
 	Server(int port, const std::string& password);
 
-	void run();
+	int createConfigureAndSetUpListeningSocket();
+	void continuouslyPollSockets(int listening_fd);
+
+	std::string& getCommandsBuffer();
 
 	/* Client lookup */
 
@@ -45,7 +46,8 @@ private:
 	std::vector<pollfd>            _pollfds;
 
 	void registerClients(int listening_fd, std::vector<pollfd> &pollfds);
-	void disconnectClient(int fd, size_t idx);
+	bool disconnectClient(int fd, size_t pollfds_idx);
+	void processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize_t bytes_received, int pollfds_idx);
 };
 
 #endif

@@ -1,3 +1,4 @@
+#include "Command.hpp"
 #include "IRC.hpp"
 #include "Server.hpp"
 #include <cstring>
@@ -8,6 +9,7 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
@@ -59,9 +61,7 @@ bool validateInput(int argc, char **argv, Input_Data *input_data) {
 		return ERROR("Password cannot be empty.");
 	}
 
-	#ifdef DEBUG
-		LOG_DEBUG("Successfully parsed input.");
-	#endif
+	LOG_DEBUG("Successfully parsed input.");
 
 	input_data->port = port;
 	input_data->password = password;
@@ -96,8 +96,8 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				break;
 			} else {
-				// NOTE: Should I just continue on real error?
-				continue;
+				ERROR("accept failed.");
+				break;
 			}
 		} else {
 			// Register client.
@@ -133,15 +133,15 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 	}
 }
 
-void Server::disconnectClient(int fd, size_t idx) {
-	_pollfds.erase(_pollfds.begin() + idx);
+bool Server::disconnectClient(int fd, size_t pollfds_idx) {
+	_pollfds.erase(_pollfds.begin() + pollfds_idx);
 	_clients.erase(fd);
 	close(fd);
 	LOG_DEBUG("client (fd) " << fd << " disconnected.");
+	return true;
 }
 
-void Server::doServerStuff() {
-
+int Server::createConfigureAndSetUpListeningSocket() {
 	int listening_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (listening_fd < 0) {
 		ERROR("Couldn't create socket.");
@@ -152,11 +152,6 @@ void Server::doServerStuff() {
 		ERROR("Couldn't set server socket reuse address option.");
 		close_socket_and_exit_with_failure(listening_fd);
 	}
-
-	// NOTE: This should be on accepted client sockets, not the listening socket (this).
-	// if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &option_value, sizeof(option_value)) == -1) {
-	// 	close_socket_and_exit_with_failure(fd);
-	// }
 
 	// Set Non-Blocking socket. Requires later upkeep.
 	int fd_flags = fcntl(listening_fd, F_GETFL);
@@ -186,6 +181,30 @@ void Server::doServerStuff() {
 		close_socket_and_exit_with_failure(listening_fd);
 	}
 
+	return listening_fd;
+}
+
+void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize_t bytes_received, int pollfds_idx) {
+	std::string &recv_buffer = client.getRecvBuffer();
+	recv_buffer.append(buffer, bytes_received);
+
+	if (recv_buffer.size() > MAX_RECV_BUFFER_SIZE) {
+		disconnectClient(client.getFd(), pollfds_idx);
+	}
+
+	size_t line_end_position = 0;
+	while ((line_end_position = recv_buffer.find("\r\n")) != std::string::npos) {
+		line_end_position += 2;
+		std::string message = recv_buffer.substr(0, line_end_position);
+		recv_buffer.erase(0, line_end_position);
+
+		LOG_DEBUG("Message: " << message);
+
+		//Command command = parse_command(message);
+	}
+}
+
+void Server::continuouslyPollSockets(int listening_fd) {
 	pollfd listening_pollfd;
 	std::memset(&listening_pollfd, 0, sizeof(listening_pollfd));
 	listening_pollfd.fd = listening_fd,
@@ -203,16 +222,20 @@ void Server::doServerStuff() {
 		size_t polled_fd_count = _pollfds.size();
 		for (size_t idx = 0; idx < polled_fd_count; idx++) {
 
-			bool client_disconnected = false;
-
 			int fd = _pollfds[idx].fd;
 			short revents = _pollfds[idx].revents;
+
+			bool disconnected = false;
 
 			if (revents == 0) {
 				continue;
 			} else if ((revents & (POLLERR | POLLHUP)) != 0) {
-				disconnectClient(fd, idx);
-				client_disconnected = true;
+				if (fd == listening_fd) {
+					ERROR("Listening socket failed.");
+					return;
+				} else {
+					disconnected = disconnectClient(fd, idx);
+				}
 			} else if ((revents & POLLIN) != 0) {
 				bool is_listening_fd = fd == listening_fd;
 				if (is_listening_fd) {
@@ -225,20 +248,20 @@ void Server::doServerStuff() {
 					if (bytes_received > 0) {
 						std::string text_received(buffer, bytes_received);
 						LOG_DEBUG("client (fd) " << fd << ": " << text_received);
+						Client& client = _clients[fd];
+						processClientBuffer(client, buffer, bytes_received, idx);
 					} else if (bytes_received == 0) {
-						disconnectClient(fd, idx);
-						client_disconnected = true;
+						disconnected = disconnectClient(fd, idx);
 					} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
 						continue;
 					} else {
 						ERROR("recv error from client " << fd << ".");
-						disconnectClient(fd, idx);
-						client_disconnected = true;
+						disconnected = disconnectClient(fd, idx);
 					}
 				}
 			}
 
-			if (client_disconnected) {
+			if (disconnected) {
 				idx--;
 				polled_fd_count--;
 			}
@@ -255,7 +278,8 @@ int main(int argc, char **argv) {
 
 	Server server(input_data.port, input_data.password);
 
-	server.doServerStuff();
+	int listening_socket_fd = server.createConfigureAndSetUpListeningSocket();
+	server.continuouslyPollSockets(listening_socket_fd);
 
 	return 0;
 }
