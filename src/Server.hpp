@@ -33,6 +33,8 @@ public:
 	/* Outgoing communication */
 
 	void flushClientMessages(Client& client);
+	void sendToClient(int fd, const std::string& message);
+	void sendToChannel(const Channel& channel, const std::string& message);
 
 private:
 
