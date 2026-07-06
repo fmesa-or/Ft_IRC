@@ -1,13 +1,14 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "IRC.hpp"
+#include "helpers.hpp"
 
 #include <sys/socket.h>
 #include <cstring>
 #include <stdint.h>
 #include <cstdlib>
 #include <iostream>
-#include <cctype>
+// #include <cctype>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -18,7 +19,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <vector>
-#include <sstream>
+// #include <sstream>
 
 // Server::Server() {}
 
@@ -30,6 +31,8 @@ void Server::sendToClient(int fd, const std::string& message) {
 
 void Server::sendToChannel(const Channel& channel, const std::string& message) {
 	TODO();
+	(void)channel;
+	(void)message;
 }
 
 void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
@@ -164,7 +167,12 @@ void Server::continuouslyPollSockets(int listening_fd) {
 	while (true) {
 
 		int fds_with_events = poll(&_pollfds[0], _pollfds.size(), -1);
-		if (fds_with_events <= 0) {
+		if (fds_with_events < 0) {
+			if (errno == EINTR) {
+				break;
+			}
+
+			ERROR("Poll failed unexpectedly");
 			break;
 		}
 
@@ -236,4 +244,27 @@ Client* Server::findClientByNick(const std::string& nickname) {
 		}
 	}
 	return NULL;
+}
+
+void Server::cleanup() {
+	LOG_DEBUG("Closing server...");
+
+	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		close(it->first);
+	}
+
+	if (_listen_fd != -1) {
+		close(_listen_fd);
+	}
+	_listen_fd = -1;
+}
+
+Channel* Server::findChannel(const std::string& name) {
+	TODO();
+	(void)name;
+}
+
+void Server::flushClientMessages(Client& client) {
+	TODO();
+	(void)client;
 }

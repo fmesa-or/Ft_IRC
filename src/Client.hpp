@@ -40,9 +40,9 @@ public:
 
 	/* Outgoing data */
 
-	void queueMessage(const std::string& message);
+	// void queueMessage(const std::string& message);
 
-	std::string& sendBuffer();
+	// std::string& getSendBuffer();
 
 private:
 
@@ -56,7 +56,7 @@ private:
 	bool        _has_username;
 
 	std::string _recv_buffer;
-	std::string _send_buffer;
+	// std::string _send_buffer;
 };
 
 #endif

@@ -19,8 +19,6 @@ public:
 	int createConfigureAndSetUpListeningSocket();
 	void continuouslyPollSockets(int listening_fd);
 
-	std::string& getCommandsBuffer();
-
 	/* Client lookup */
 
 	Client* findClientByFd(int fd);
@@ -35,6 +33,8 @@ public:
 	void flushClientMessages(Client& client);
 	void sendToClient(int fd, const std::string& message);
 	void sendToChannel(const Channel& channel, const std::string& message);
+
+	void cleanup();
 
 private:
 

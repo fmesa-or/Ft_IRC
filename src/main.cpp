@@ -1,10 +1,9 @@
-#include "Command.hpp"
 #include "IRC.hpp"
 #include "Server.hpp"
+
 #include <cstring>
 #include <stdint.h>
 #include <cstdlib>
-#include <iostream>
 #include <cctype>
 #include <sys/poll.h>
 #include <sys/socket.h>
@@ -15,9 +14,13 @@
 #include <netinet/tcp.h>
 #include <fcntl.h>
 #include <poll.h>
-#include <vector>
-#include <sstream>
+#include <csignal>
 
+volatile sig_atomic_t global_signal = 0;
+
+void handleSignal(int signal) {
+	global_signal = signal;
+}
 
 typedef struct Input_Data {
 	long port;
@@ -60,24 +63,9 @@ bool validateInput(int argc, char **argv, Input_Data *input_data) {
 	return true;
 }
 
-void close_socket_and_exit_with_failure(int socket_fd) {
-	close(socket_fd);
-	exit(EXIT_FAILURE);
-}
-
-std::string getIpStringFromNetwork(const sockaddr_in& socket_address) {
-	char ip[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &socket_address.sin_addr, ip, INET_ADDRSTRLEN);
-
-	uint16_t port = ntohs(socket_address.sin_port);
-
-	std::stringstream address_string_stream;
-	address_string_stream << ip << ":" << port;
-
-	return address_string_stream.str();
-}
-
 int main(int argc, char **argv) {
+	signal(SIGINT, &handleSignal);
+
 	Input_Data input_data;
 	bool ok = validateInput(argc, argv, &input_data);
 	if (!ok) {
@@ -89,5 +77,6 @@ int main(int argc, char **argv) {
 	int listening_socket_fd = server.createConfigureAndSetUpListeningSocket();
 	server.continuouslyPollSockets(listening_socket_fd);
 
-	return 0;
+	server.cleanup();
+	return EXIT_FAILURE;
 }
