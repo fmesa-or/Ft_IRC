@@ -29,7 +29,7 @@ Try to make a template for all the add, remove and has methods.	✅
 # 2026/06/25
 Needed description for templates.			✅
 Should we give "const" to the new getters?
-Look how to make handleJoin.
+Look how to make handleJoin.				✅
 Complete tester with new parts added
 
 # 2026/07/07
