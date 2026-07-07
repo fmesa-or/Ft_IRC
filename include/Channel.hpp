@@ -27,13 +27,13 @@ private:
 
 	/* Templates */
 	template <typename Container>
-	void	addContainer(Client& client, Container& container);
+	void	addToContainer(Client& client, Container& container);
 
 	template <typename Container>
-	void	removeContainer(Client& client, Container& container);
+	void	removeFromContainer(Client& client, Container& container);
 
 	template <typename Container>
-	bool	hasContainer(const Client& client, Container& container) const ;
+	bool	hasInContainer(const Client& client, Container& container) const ;
 
 public:
 

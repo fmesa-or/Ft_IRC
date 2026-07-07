@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/06/25 18:31:07 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/07 18:05:19 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ const std::string& Channel::getName() const {
  * Agregates a new @param client to the @param _members set container *
  *********************************************************************/
 void Channel::addMember(Client& client) {
-	addContainer(client, _members);
+	addToContainer(client, _members);
 }
 
 /*******************************************************************
@@ -49,10 +49,10 @@ void Channel::addMember(Client& client) {
  ******************************************************************/
 void Channel::removeMember(Client& client) {
 	if (isOperator(client)) {
-		removeContainer(client, _operators);
+		removeFromContainer(client, _operators);
 	}
 	
-	removeContainer(client, _members);
+	removeFromContainer(client, _members);
 
 	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
@@ -61,7 +61,7 @@ void Channel::removeMember(Client& client) {
  * Checks if a @param client exists inside the @param _members set container *
  ****************************************************************************/
 bool Channel::hasMember(const Client& client) const {
-	return hasContainer(client, _members);
+	return hasInContainer(client, _members);
 }
 
 /*************************************************************
@@ -87,7 +87,7 @@ void Channel::addOperator(Client& client) {
 		// No puede ser añadido como operador si no existe previamente como miembro
 		return; // Puede que aquí añada un throw
 	}
-	addContainer(client, _operators);
+	addToContainer(client, _operators);
 }
 
 /*********************************************************************
@@ -98,11 +98,11 @@ void Channel::addOperator(Client& client) {
 void Channel::removeOperator(Client& client) {
 	// Allways has to be at least one operator
 	if (_operators.size() > 1) {
-		removeContainer(client, _operators);
+		removeFromContainer(client, _operators);
 	}
 	else if (_operators.size() == 1 && _members.size() == 1) {
-		removeContainer(client, _operators);
-		removeContainer(client, _members);
+		removeFromContainer(client, _operators);
+		removeFromContainer(client, _members);
 	}
 	else {
 		// Mensaje: solo puede quedar uno (operador)
@@ -113,7 +113,7 @@ void Channel::removeOperator(Client& client) {
  * Checks if a @param client is inside the @param _operators set container *
  **************************************************************************/
 bool Channel::isOperator(const Client& client) const {
-	return hasContainer(client, _operators);
+	return hasInContainer(client, _operators);
 }
 
 /***************************************************************
@@ -134,14 +134,14 @@ const std::set<Client*>& Channel::getOperators() const {
  *	second	-> True if added, False if not.                           *
  *********************************************************************/
 void Channel::addInvited(Client& client) {
-	addContainer(client, _invited);
+	addToContainer(client, _invited);
 }
 
 /*******************************************************************
  * Wipe out a @param client from the @param _invited set container *
  ******************************************************************/
 void Channel::removeInvited(Client& client) {
-	removeContainer(client, _invited);
+	removeFromContainer(client, _invited);
 
 	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
@@ -150,7 +150,7 @@ void Channel::removeInvited(Client& client) {
  * Checks if a @param client exists inside the @param _invited set container *
  ****************************************************************************/
 bool Channel::hasInvited(const Client& client) const {
-	return hasContainer(client, _invited);
+	return hasInContainer(client, _invited);
 }
 
 /*************************************************************
