@@ -38,3 +38,15 @@ HandleJoin process the JOIN command to add a user to a channel. Checks for modes
 	-Validates client Nick & User
 	-Searchs or creates the channel
 	-Chechks restrictions like +i (InviteOnly), +k (key), +l (user limit)
+
+# 2026/07/08
+Channel suport added
+	┠─ canJoin							✅
+	┠─ handleJoin						✅
+	┠─ handlePart						✅
+	┠─ handleKick						✅
+	┖─ handleInvite						✅
+-Need to :
+	┠─ Add descriptions to new methods	✅
+	┠─ Add new methods to tester
+	┖─ Make unitary test

@@ -67,7 +67,14 @@ public:
 
 	const	std::set<Client*>&	getInvited() const;
 
-	/* Others */
+	/* Channel Support */
+	bool	canJoin(const Client& client, const std::string& key) const;
+	void	handleJoin(Client& client, const std::string& key = "");  // El primer usuario que crea el canal debe ser operador.
+	void	handlePart(Client& client);
+	void	handleKick(Client& kicker, Client& target);
+	void	handleInvite(Client& inviter, Client& invited);
+
+	/* Setters & Getters */
 	void	setName(std::string name);
 	void	setTopic(std::string topic);
 	void	setKey(const std::string key);
@@ -75,15 +82,12 @@ public:
 	void	setTopicRestricted(bool topicRestricted);
 	void	setUserLimit(size_t userLimit);
 
-	std::string&	getName();
 	std::string&	getTopic();
 	std::string&	getKey();
 	bool			getInviteOnly();
 	bool			getTopicRestricted();
 	size_t			getUserLimit();
 
-	/* Channel Creation Support */
-//	handleJoin(); // El primer usuario que crea el canal debe ser operador.
 };
 
 # include "Channel.tpp"
