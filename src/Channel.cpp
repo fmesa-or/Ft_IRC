@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/08 18:33:17 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/08 18:45:09 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,7 @@ const std::set<Client*>&	Channel::getInvited() const {
  ***********************************************/
  bool	Channel::canJoin(const Client& client, const std::string& key) const {
 	// Revisar canal lleno
-	if (_userLimit > 0 && _members.size() > _userLimit) {
+	if (_userLimit > 0 && _members.size() >= _userLimit) {
 		std::cout << "User regected: Channel reached limit." << std::endl; //debug
 		return false; // Channel full
 	}
@@ -209,7 +209,7 @@ const std::set<Client*>&	Channel::getInvited() const {
  *	Checks if there is an invitation mode                        *
  *		and removes the user from the invitation list.           *
  ****************************************************************/
-void	Channel::handleJoin(Client& client, const std::string& key = "") {
+void	Channel::handleJoin(Client& client, const std::string& key) {
 	if (!canJoin(client, key)) {
 		return; // B rol should send numeric error
 	}
