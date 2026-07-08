@@ -1,42 +1,83 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <string>
-# include <map>
+#include <map>
+#include <string>
 
-# include "Client.hpp"
-# include "Channel.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+
+class CommandDispatcher;
 
 class Server
 {
 public:
 
-	Server(int port, const std::string& password);
+    Server(int port, const std::string& password);
 
-	void run();
+    void run();
 
-	/* Client lookup */
+    /*======================================================
+    =                     Configuration                    =
+    ======================================================*/
 
-	Client* findClientByFd(int fd);
-	Client* findClientByNick(const std::string& nickname);
+    const std::string& getPassword() const;
 
-	/* Channel lookup */
+    /*======================================================
+    =                     Client lookup                    =
+    ======================================================*/
 
-	Channel* findChannel(const std::string& name);
+    Client* findClientByFd(int fd);
 
-	/* Outgoing communication */
+    Client* findClientByNick(const std::string& nickname);
 
-	void flushClientMessages(Client& client);
+    /*======================================================
+    =                    Channel lookup                    =
+    ======================================================*/
+
+    Channel* findChannel(const std::string& name);
+
+    /*======================================================
+    =                 Channel management                   =
+    ======================================================*/
+
+    Channel* createChannel(const std::string& name);
+
+    void removeChannel(const std::string& name);
+
+    void addClientToChannel(Client& client, const std::string &channelName);
+
+    void removeClientFromChannel(Client& client, const std::string &channelName);
+
+    /*======================================================
+    =                  Client management                   =
+    ======================================================*/
+
+    void disconnectClient(Client &client);
+
+    /*======================================================
+    =                  Outgoing messages                   =
+    ======================================================*/
+
+    void sendToClient(Client &client, const std::string &message);
+
+    void sendToChannel(const std::string &channelName, const std::string &message);
+
+    void flushClientMessages(Client &client);
 
 private:
 
-	int         _port;
-	std::string _password;
+    int _port;
 
-	int         _listen_fd;
+    std::string _password;
 
-	std::map<int, Client>          _clients;
-	std::map<std::string, Channel> _channels;
+    int _listen_fd;
+
+    std::map<int, Client> _clients;
+
+    std::map<std::string, Channel> _channels;
+
+    CommandDispatcher _dispatcher;
 };
 
 #endif
