@@ -48,5 +48,9 @@ Channel suport added
 	┖─ handleInvite						✅
 -Need to :
 	┠─ Add descriptions to new methods	✅
-	┠─ Add new methods to tester
-	┖─ Make unitary test
+	┠─ Add new methods to tester		✅
+	┖─ Make unitary test				✅
+
+# 2026/07/09
+Find purpouse of _topicRestricted				
+Build methods to operate with _topicRestricted	

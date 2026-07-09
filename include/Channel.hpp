@@ -49,7 +49,6 @@ public:
 	void	addMember(Client& client);
 	void	removeMember(Client& client);
 	bool	hasMember(const Client& client) const;
-
 	const	std::set<Client*>&	getMembers() const;
 
 	/* Operators */
@@ -57,19 +56,18 @@ public:
 	void	addOperator(Client& client);
 	void	removeOperator(Client& client);
 	bool	isOperator(const Client& client) const;
-
 	const std::set<Client*>&	getOperators() const;
 
 	/* Invited */
 	void	addInvited(Client& client);
 	void	removeInvited(Client& client);
 	bool	hasInvited(const Client& client) const;
-
 	const	std::set<Client*>&	getInvited() const;
 
 	/* Channel Support */
 	bool	canJoin(const Client& client, const std::string& key) const;
-	void	handleJoin(Client& client, const std::string& key = "");  // El primer usuario que crea el canal debe ser operador.
+	void	handleJoin(Client& client, const std::string& key);  // El primer usuario que crea el canal debe ser operador.
+	void	handleJoin(Client& client); // Overload
 	void	handlePart(Client& client);
 	void	handleKick(Client& kicker, Client& target);
 	void	handleInvite(Client& inviter, Client& invited);

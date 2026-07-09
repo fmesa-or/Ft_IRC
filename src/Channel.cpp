@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/08 18:45:09 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/09 16:48:27 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,6 +211,23 @@ const std::set<Client*>&	Channel::getInvited() const {
  ****************************************************************/
 void	Channel::handleJoin(Client& client, const std::string& key) {
 	if (!canJoin(client, key)) {
+		return; // B rol should send numeric error
+	}
+	bool isFirst = _members.empty();
+	addMember(client);
+	if (isFirst) {
+		addOperator(client); // This means the client is the creator of the channel
+	}
+	if (_inviteOnly) {
+		removeInvited(client); // Remove the invitation for this user
+	}
+}
+
+/*********************************
+ * Overload when inserted no key *
+ ********************************/
+void	Channel::handleJoin(Client& client) {
+	if (!canJoin(client, "")) {
 		return; // B rol should send numeric error
 	}
 	bool isFirst = _members.empty();
