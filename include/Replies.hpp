@@ -23,6 +23,8 @@ public:
 
 	static std::string alreadyRegistered(const Client &client);
 
+    static std::string notRegistered(const Client &client);
+
 };
 
 #endif

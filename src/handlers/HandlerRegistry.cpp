@@ -13,7 +13,7 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["NICK"] = &CommandDispatcher::handleNick;
 	_handlers["USER"] = &CommandDispatcher::handleUser;
 
-
+/*
     // Channels
     _handlers["JOIN"] = &CommandDispatcher::handleJoin;
     _handlers["PART"] = &CommandDispatcher::handlePart;
@@ -26,4 +26,5 @@ void CommandDispatcher::registerHandlers() {
     // Protocol
     _handlers["PING"] = &CommandDispatcher::handlePing;
     _handlers["PONG"] = &CommandDispatcher::handlePong;
+	*/
 }

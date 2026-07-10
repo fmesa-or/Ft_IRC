@@ -1,6 +1,9 @@
 #include "CommandDispatcher.hpp"
+#include "Client.hpp"
+#include "Command.hpp"
 #include "Server.hpp"
 #include "Replies.hpp"
+
 
 /* ************************************************************************** */
 /*                            User registration                               */
@@ -8,16 +11,16 @@
 
 void CommandDispatcher::handlePass(Server &server, Client &client, const Command &cmd) {
 	if (client.isRegistered()) {
-		server.sendToClient(client, Replies::alreadyRegistered(client));
+		server.sendToClient(client.getFd(), Replies::alreadyRegistered(client));
 		return;
 	}
 	if (cmd.params.empty()) {
-        server.sendToClient(client, Replies::needMoreParams(client, "PASS"));
+        server.sendToClient(client.getFd(), Replies::needMoreParams(client, "PASS"));
         return;
     }
 
     if (cmd.params[0] != server.getPassword()) {
-        server.sendToClient(client, Replies::passwordIncorrect());
+        server.sendToClient(client.getFd(), Replies::passwordIncorrect());
         return;
     }
 
@@ -28,7 +31,7 @@ void CommandDispatcher::handlePass(Server &server, Client &client, const Command
 
 void CommandDispatcher::handleNick(Server &server, Client &client, const Command &cmd) {
 	if (cmd.params.empty()) {
-        server.sendToClient(client, Replies::noNicknameGiven());
+    server.sendToClient(client.getFd(), Replies::noNicknameGiven());
         return;
     }
 
@@ -37,7 +40,7 @@ void CommandDispatcher::handleNick(Server &server, Client &client, const Command
     Client *other = server.findClientByNick(nick);
 
     if (other && other != &client) {
-        server.sendToClient(client, Replies::nicknameInUse(client, nick));
+        server.sendToClient(client.getFd(), Replies::nicknameInUse(client, nick));
         return;
     }
 
@@ -49,11 +52,11 @@ void CommandDispatcher::handleNick(Server &server, Client &client, const Command
 
 void CommandDispatcher::handleUser(Server &server, Client &client, const Command &cmd) {
 	if (client.isRegistered()) {
-		server.sendToClient(client, Replies::alreadyRegistered(client));
+        server.sendToClient(client.getFd(), Replies::alreadyRegistered(client));
 		return;
 	}
 	if (cmd.params.size() < 4) {
-        server.sendToClient(client, Replies::needMoreParams(client, "USER"));
+        server.sendToClient(client.getFd(), Replies::needMoreParams(client, "USER"));
         return;
     }
     client.setUsername(cmd.params[0]);

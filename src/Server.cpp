@@ -29,6 +29,10 @@
 
 Server::Server(int port, const std::string& password) : _port(port), _password(password) {}
 
+const std::string& Server::getPassword() const {
+	return _password;
+}
+
 void Server::sendToClient(int fd, const std::string& message) {
 	send(fd, message.c_str(), message.size(), 0);
 }
@@ -169,7 +173,7 @@ void Server::continuouslyPollSockets(int listening_fd) {
 
 	while (true) {
 
-		int fds_with_events = poll(&_pollfds[0], _pollfds.size(), -1);
+		int fds_with_events = poll(&_pollfds[0], _pollfds.size(), -1); // AQUI CUELGA
 		if (fds_with_events < 0) {
 			if (errno == EINTR) {
 				break;

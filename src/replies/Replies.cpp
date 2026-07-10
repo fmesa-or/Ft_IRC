@@ -24,3 +24,7 @@ std::string Replies::passwordIncorrect() {
 std::string Replies::alreadyRegistered(const Client &client) {
 	return ":ft_irc 462 " + client.getNickname() + " :You may not reregister\r\n";
 }
+
+std::string Replies::notRegistered(const Client &client) {
+    return ":ft_irc 451 " + client.getNickname() + " :You have not registered\r\n";
+}

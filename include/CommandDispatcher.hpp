@@ -3,9 +3,10 @@
 
 #include <string>
 #include <map>
-#include "Command.hpp"
-#include "Server.hpp"
-#include "Client.hpp"
+
+class Server;
+class Client;
+struct Command;
 
 // class Server;
 // class Client;
@@ -37,17 +38,17 @@ class CommandDispatcher {
 		void tryRegister(Server &server, Client &client);
 
     	// ---- CHANNELS ----
-    	void handleJoin(Server &server, Client &client, const Command &cmd);
-    	void handlePart(Server &server, Client &client, const Command &cmd);
-    	void handleQuit(Server &server, Client &client, const Command &cmd);
+    //	void handleJoin(Server &server, Client &client, const Command &cmd);
+    //	void handlePart(Server &server, Client &client, const Command &cmd);
+    //	void handleQuit(Server &server, Client &client, const Command &cmd);
 
     	// ---- MESSAGING ----
-    	void handlePrivmsg(Server &server, Client &client, const Command &cmd);
-    	void handleNotice(Server &server, Client &client, const Command &cmd);
+    //	void handlePrivmsg(Server &server, Client &client, const Command &cmd);
+    //	void handleNotice(Server &server, Client &client, const Command &cmd);
 
     	// ---- PROTOCOL ----
-    	void handlePing(Server &server, Client &client, const Command &cmd);
-    	void handlePong(Server &server, Client &client, const Command &cmd);
+    //	void handlePing(Server &server, Client &client, const Command &cmd);
+    //	void handlePong(Server &server, Client &client, const Command &cmd);
 };
 
 #endif
