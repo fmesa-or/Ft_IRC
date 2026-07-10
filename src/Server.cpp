@@ -2,6 +2,9 @@
 #include "Client.hpp"
 #include "IRC.hpp"
 #include "helpers.hpp"
+#include "Command.hpp"
+#include "CommandDispatcher.hpp"
+#include "Parser.hpp"
 
 #include <sys/socket.h>
 #include <cstring>
@@ -19,6 +22,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <vector>
+#include <cerrno>
 // #include <sstream>
 
 // Server::Server() {}
@@ -149,10 +153,9 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 
 		LOG_DEBUG("Message: " << message);
 
-		// Parser parser;
-		// Command command = parser.parseLine(message);
-		// CommandDispatcher dispatcher;
-		// dispatcher.dispatch(*this, client, command);
+		Parser parser;
+		Command command = parser.parseLine(message);
+		_dispatcher.dispatch(*this, client, command);
 	}
 }
 

@@ -21,7 +21,7 @@ public:
 
     static std::string passwordIncorrect();
 
-	static std::string Replies::alreadyRegistered(const Client &client)
+	static std::string alreadyRegistered(const Client &client);
 
 };
 

@@ -7,6 +7,7 @@
 # include <sys/poll.h>
 # include <sys/types.h>
 
+# include "CommandDispatcher.hpp"
 # include "IRC.hpp"
 # include "Client.hpp"
 # include "Channel.hpp"
@@ -42,6 +43,8 @@ private:
 	std::string _password;
 
 	int         _listen_fd;
+
+    CommandDispatcher _dispatcher;
 
 	std::map<int, Client>          _clients;
 	std::map<std::string, Channel> _channels;

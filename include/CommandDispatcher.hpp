@@ -4,9 +4,11 @@
 #include <string>
 #include <map>
 #include "Command.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
 
-class Server;
-class Client;
+// class Server;
+// class Client;
 
 
 class CommandDispatcher {

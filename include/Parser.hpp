@@ -6,9 +6,11 @@
 #include <vector>
 
 class	Parser {
+	public:
+		Command						parseLine(const std::string &line);
+
 	private:
 		std::vector<std::string>	split(const std::string &str);
-		Command						parseLine(const std::string &line);
 };
 
 #endif
