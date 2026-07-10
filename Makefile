@@ -6,7 +6,7 @@
 #    By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/28 17:42:13 by fmesa-or          #+#    #+#              #
-#    Updated: 2026/07/10 17:14:27 by fmesa-or         ###   ########.fr        #
+#    Updated: 2026/07/10 17:19:35 by fmesa-or         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,8 @@ SRC = \
 	src/Client.cpp \
 	src/helpers.cpp \
 	src/main.cpp \
-	src/Server.cpp
+	src/Server.cpp \
+	src/Channel/Channel.cpp
 
 #Objects
 OBJ_DIR = obj
