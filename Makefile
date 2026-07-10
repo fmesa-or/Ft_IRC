@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+         #
+#    By: cargonz2 <cargonz2@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/28 17:42:13 by fmesa-or          #+#    #+#              #
-#    Updated: 2026/05/21 13:32:08 by fmesa-or         ###   ########.fr        #
+#    Updated: 2026/07/10 16:13:51 by cargonz2         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,19 @@ CLEAN = rm -f
 
 #Sources
 SRC_DIR = src
-SRC =	src/
+SRC = \
+	src/dispatcher/CommandDispatcher.cpp \
+	src/handlers/ChannelHandlers.cpp \
+	src/handlers/HandlerRegistry.cpp \
+	src/handlers/MsgHandlers.cpp \
+	src/handlers/ProtocolHandlers.cpp \
+	src/handlers/RegistrationHandlers.cpp \
+	src/parser/Parser.cpp \
+	src/replies/Replies.cpp \
+	src/Client.cpp \
+	src/helpers.cpp \
+	src/main.cpp \
+	src/Server.cpp
 
 #Objects
 OBJ_DIR = obj

@@ -1,0 +1,53 @@
+#ifndef COMMANDDISPATCHER_HPP
+# define COMMANDDISPATCHER_HPP
+
+#include <string>
+#include <map>
+#include "Command.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
+
+// class Server;
+// class Client;
+
+
+class CommandDispatcher {
+	public:
+    	CommandDispatcher();
+    	~CommandDispatcher();
+
+    	void dispatch(Server &server, Client &client, const Command &cmd);
+
+	private:
+
+		// Pointer to member function
+    	typedef	void (CommandDispatcher::*Handler)(Server &server, Client &client, const Command &cmd);
+
+		// Iterator
+		typedef	std::map<std::string, Handler>::iterator HandlerIterator;
+
+		// Command table
+    	std::map<std::string, Handler> _handlers;
+
+		//  REGISTRATION
+    	void registerHandlers();
+		void handlePass(Server &server, Client &client, const Command &cmd);
+    	void handleNick(Server &server, Client &client, const Command &cmd);
+    	void handleUser(Server &server, Client &client, const Command &cmd);
+		void tryRegister(Server &server, Client &client);
+
+    	// ---- CHANNELS ----
+    	void handleJoin(Server &server, Client &client, const Command &cmd);
+    	void handlePart(Server &server, Client &client, const Command &cmd);
+    	void handleQuit(Server &server, Client &client, const Command &cmd);
+
+    	// ---- MESSAGING ----
+    	void handlePrivmsg(Server &server, Client &client, const Command &cmd);
+    	void handleNotice(Server &server, Client &client, const Command &cmd);
+
+    	// ---- PROTOCOL ----
+    	void handlePing(Server &server, Client &client, const Command &cmd);
+    	void handlePong(Server &server, Client &client, const Command &cmd);
+};
+
+#endif
