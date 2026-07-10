@@ -15,13 +15,18 @@ void CommandDispatcher::dispatch(Server &server, Client &client, const Command &
         return;
     }
 
+	if (!client.isRegistered() && cmd.name != "PASS" && cmd.name != "NICK" && cmd.name != "USER") {
+        server.sendToClient(client, Replies::notRegistered(client));
+        return;
+    }
+
     Handler h = it->second;
 
     (this->*h)(server, client, cmd);
 }
 
 
-
+/*
 void CommandDispatcher::handlePass(Server &server, Client &client, const Command &cmd) {
 	    if (cmd.params.empty())
     {
@@ -88,11 +93,13 @@ void CommandDispatcher::tryRegister(Server &server, Client &client) {
     server.sendToClient(client, ":ft_irc 001 " + client.getNickname() + " :Welcome to the Internet Relay Network\r\n");
 }
 
+*/
+
 /* ************************************************************************** *
 /
 /*                                Channels                                    */
 /* ************************************************************************** */
-
+/*
 void CommandDispatcher::handleJoin(Server &server, Client &client, const Command &cmd) {
     (void)server;
     (void)client;
@@ -115,12 +122,12 @@ void CommandDispatcher::handleQuit(Server &server, Client &client, const Command
     (void)cmd;
 
     // TODO
-}
+} */
 
 /* ************************************************************************** */
 /*                               Messaging                                    */
 /* ************************************************************************** */
-
+/*
 void CommandDispatcher::handlePrivmsg(Server &server, Client &client, const Command &cmd) {
     (void)server;
     (void)client;
@@ -140,7 +147,7 @@ void CommandDispatcher::handleNotice(Server &server, Client &client, const Comma
 /* ************************************************************************** */
 /*                                Protocol                                    */
 /* ************************************************************************** */
-
+/*
 void CommandDispatcher::handlePing(Server &server, Client &client, const Command &cmd) {
     (void)server;
     (void)client;
@@ -185,3 +192,4 @@ void CommandDispatcher::handleKick(Server &server, Client &client, const Command
     (void)client;
     (void)cmd;
 }
+*/
