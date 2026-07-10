@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/10 14:41:52 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/10 17:46:49 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,9 @@ Channel::Channel(void)
   *******************/
 Channel::Channel(const std::string& name)
 	: _name(name) , _topic(""), _key(""), _inviteOnly(false),
-	 _topicRestricted(false), _userLimit(0){}
+	 _topicRestricted(false), _userLimit(0){
+		std::cout << "Channel " << _name << " created" << std::endl;
+	 }
 
 	/************
 	 * IDENTITY *

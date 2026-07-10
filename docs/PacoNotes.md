@@ -30,7 +30,7 @@ Try to make a template for all the add, remove and has methods.	✅
 Needed description for templates.			✅
 Should we give "const" to the new getters?
 Look how to make handleJoin.				✅
-Complete tester with new parts added
+Complete tester with new parts added		✅
 
 # 2026/07/07
 HandleJoin process the JOIN command to add a user to a channel. Checks for modes, passwords, limits and sends the exit to the rest of users in channel. ("Pepito has join the channel")
@@ -51,12 +51,13 @@ Channel suport added
 	┠─ Add new methods to tester		✅
 	┖─ Make unitary test				✅
 
-# 2026/07/09
+# 2026/07/10
+Look for the implementation of the tools made,
+	something in betwen Cristian work and mine			
+Look for mode flags +o & +t								
 Find purpouse of _topicRestricted						
 Find how to handle _topicRestricted. Is it mandatory?	
 Build methods to operate with _topicRestricted			
-
-# 2026/07/10
 Is it mandatory to have a topic in everychannel?		
 How we deal with add new operators? Is allowed?			
 Look how commands works. How we resolve +k +i ....		
