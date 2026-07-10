@@ -52,5 +52,12 @@ Channel suport added
 	┖─ Make unitary test				✅
 
 # 2026/07/09
-Find purpouse of _topicRestricted				
-Build methods to operate with _topicRestricted	
+Find purpouse of _topicRestricted						
+Find how to handle _topicRestricted. Is it mandatory?	
+Build methods to operate with _topicRestricted			
+
+# 2026/07/10
+Is it mandatory to have a topic in everychannel?		
+How we deal with add new operators? Is allowed?			
+Look how commands works. How we resolve +k +i ....		
+Look for limitations for setters						
