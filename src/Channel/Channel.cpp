@@ -6,11 +6,12 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/10 12:58:44 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/10 14:41:52 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
+#include "Client.hpp"
 
 /***************
  * Constructor *
@@ -181,6 +182,14 @@ const std::set<Client*>&	Channel::getInvited() const {
  * Checks if @param client can join the channel *
  ***********************************************/
  bool	Channel::canJoin(const Client& client, const std::string& key) const {
+	// Revisar que client está registrado
+	if (!client.isRegistered()) {
+		return false; // Is not registred
+	}
+	// Revisar que el cliente no está ya dentro de la lista de miembros
+	if (hasMember(client)) {
+		return false; // Already in channel
+	}
 	// Revisar canal lleno
 	if (_userLimit > 0 && _members.size() >= _userLimit) {
 		std::cout << "User regected: Channel reached limit." << std::endl; //debug

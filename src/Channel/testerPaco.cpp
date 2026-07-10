@@ -6,28 +6,29 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/23 17:04:44 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/09 18:03:40 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/10 14:50:54 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
+#include "Client.hpp"
 
-class Client {
-	private:
-	public:
-		std::string	_name;
-		Client(std::string& name) : _name(name){};
-};
-
+static void registerClient(Client& client, const std::string& nickname, const std::string& username)
+{
+	client.setNickname(nickname);
+	client.setHasNickname(true);
+	client.setUsername(username);
+	client.setHasUsername(true);
+	client.setHasPassword(true);
+}
 
 /**********************************************
  * UNITARY TESTS                              *
  *                                            *
- * Hide Client.hpp to use the following tests *
  *********************************************/
 int	main() {
 
-/*
+
 	try {
 		// Constructors
 		std::cout << "****************" 
@@ -49,7 +50,8 @@ int	main() {
 				  << "* MEMBERSHIP *"
 				  << "**************" << std::endl;
 		std::string	name1 = "Miguel";
-		Client cliente1(name1);
+		Client cliente1;
+		registerClient(cliente1, name1, "miguel");
 		ch1.addMember(cliente1);
 		ch2.addMember(cliente1);
 		if (ch1.hasMember(cliente1) && ch2.hasMember(cliente1)) {
@@ -84,7 +86,8 @@ int	main() {
 				  << "*************"<< std::endl;
 		Channel	ch3("Pokefans");
 		std::string	name2 = "PikachuFan<33";
-		Client	client2(name2);
+		Client	client2;
+		registerClient(client2, name2, "pikachufan");
 
 		ch3.addInvited(client2);
 		if (ch3.hasInvited(client2)) {
@@ -104,7 +107,8 @@ int	main() {
 				  << "  CHANNEL SUPORT "
 				  << "***********"<< std::endl;
 		std::string	name3 = "VaporeonMaster76";
-		Client	client3(name3);
+		Client	client3;
+		registerClient(client3, name3, "vaporeonmaster");
 
 		// First user must be Operator
 		ch3.handleJoin(client2);
@@ -114,7 +118,7 @@ int	main() {
 
 		if (ch3.getOperators().size() == 1) {
 			std::set<Client*>::iterator it = ch3.getOperators().begin();
-			std::cout << "Operator is " << (*it)->_name << std::endl;
+			std::cout << "Operator is " << (*it)->getNickname() << std::endl;
 		} else {
 			std::cout << "Failed to create first operator" << std::endl;
 		}
@@ -169,7 +173,8 @@ int	main() {
 
 		ch3.setInvitedOnly(true);
 		std::string	name4 = "XxSnorlaxLifterxX";
-		Client	client4(name4);
+		Client	client4;
+		registerClient(client4, name4, "snorlaxlifter");
 			// No
 		std::cout << std::endl;
 		std::cout << "* ------No INVITED------ *" << std::endl;
@@ -212,9 +217,11 @@ int	main() {
 		ch3.setInvitedOnly(false);
 		std::cout << "Setting _userLimit to 4" << std::endl;
 		std::string	name5 = "Satoshi";
-		Client	client5(name5);
+		Client	client5;
+		registerClient(client5, name5, "satoshi");
 		std::string	name6 = "Red";
-		Client	client6(name6);
+		Client	client6;
+		registerClient(client6, name6, "red");
 		ch3.setUserLimit(4);
 
 		ch3.handleJoin(client5, "PokeTruco");
@@ -243,13 +250,22 @@ int	main() {
 		std::cout << "Number of members(4) = " <<  ch3.getMembers().size() << std::endl;
 		std::cout << "Number of operators(1) = " <<  ch3.getOperators().size() << std::endl;
 
+		// Test Already Member
+		std::cout << std::endl;
+		std::cout << "*************" 
+				  << "* ALREADY MEMBER *"
+				  << "*************" << std::endl;
+		std::cout << "Try to add an already member" << std::endl;
+		ch3.handleJoin(client3, "PokeTruco");
+		std::cout << "Number of members(4) = " <<  ch3.getMembers().size() << std::endl;
+		std::cout << "Number of operators(1) = " <<  ch3.getOperators().size() << std::endl;
 
 
 	}
 	catch(const std::exception& ex) {
 		std::cout << "Exception: " << ex.what() << std::endl;
 	}
-*/
+
 
 
 	return 0;
