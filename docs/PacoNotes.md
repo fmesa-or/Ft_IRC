@@ -60,12 +60,12 @@ Look for mode flags +o & +t								✅
 	┖─ (+/-)t -> Activates/Deactivates TopicRestricted
 Find purpouse of _topicRestricted						✅
 	┖─Only Operators can change Topic
-Find how to handle _topicRestricted. Is it mandatory?	
-Build methods to operate with _topicRestricted			
-Is it mandatory to have a topic in everychannel?		
-How we deal with add new operators? Is allowed?			
-Look how commands works. How we resolve +k +i ....		
-Look for limitations for setters						
+Find how to handle _topicRestricted. Is it mandatory?	✅
+Build methods to operate with _topicRestricted			✅
+Is it mandatory to have a topic in everychannel?		✅ (No)
+How we deal with add new operators? Is allowed?			✅ (+/-o)
+Look how commands works. How we resolve +k +i ....		✅ (/mod)
+Look for limitations for setters						✅
 
 # 2026/07/15
 Touched:
@@ -78,14 +78,15 @@ Touched:
 
 Issues detected:
 	┠─ Register not working
-	┠─ We are "Joining" a channel the object, but we are not joined to hexchat
-	┖─  Is the parser wrong? HexChannel says it must be "/join #PokeFans" but we are working without the '#' ('&' for local channels) UPDATE: FIXED ✅
+	┠─ We are "Joining" a channel the object, but we are not joined to hexchat ✅
+	┠─ Second clients can not join channels already made but first client can
+	┖─ Is the parser wrong? HexChannel says it must be "/join #PokeFans" but we are working without the '#' ('&' for local channels) UPDATE: FIXED just # ✅ // Need to fix &channel
 
 TODO
-	┠─ Implement TopicRestricted
-	┠─ Implement Add/Revoke Operator
-	┠─ Implement Activate/Deactivate Topic Restricted
-	┠─ Implement Topic creation with </topic #42 :Canal para el proyecto ft_irc>
+	┠─ Implement TopicRestricted													
+	┠─ Implement Add/Revoke Operator												
+	┠─ Implement Activate/Deactivate Topic Restricted								
+	┠─ Implement Topic creation with </topic #42 :Canal para el proyecto ft_irc>	
 	┠─ Implement the JOIN for the HexChat so it will know we are in the channel		✅
 		┠─ HexChat interaction ->	C: JOIN #PokeFans
 

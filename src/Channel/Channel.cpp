@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/15 19:39:24 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/15 22:31:20 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,54 +281,110 @@ void	Channel::handleInvite(Client& inviter, Client& target) {
 	}
 }
 
+/***********************************************
+ * Checks if the invitator is an Operator      *
+ * 	Then checks the action add(+) or remove(-) *
+ **********************************************/
+void	Channel::handleOperatorinator(Client& inviter, Client& target, char action) {
+	if (isOperator(inviter)) {
+		if (action == '+') {
+			addOperator(target);
+		}
+		if (action == '-') {
+			removeOperator(target);
+		}
+	}
+}
+
+	/*****************
+	 * CHANNEL MODES *
+	 ****************/
+
+/**
+ * Changes Topic to a new one.
+ * If restricted only Operators can change it. *
+ */
+void	Channel::handleTopic(Client& client, std::string topic) {
+	if (_topicRestricted && !isOperator(client)) {
+		// Must comunicate con hexchat that topic restricted is on and client isn't an operator
+		return;
+	}
+	_topic = topic;
+}
+
+/**
+ * Changes inviteOnly mode if client is operator
+ */
+void	Channel::setInvitedOnly(Client& client, bool inviteOnly) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	_inviteOnly = inviteOnly;
+}
+
+/**
+ * Changes topicRestricted mode if client is operator
+ */
+void	Channel::setTopicRestricted(Client& client, bool topicRestricted) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	_topicRestricted = topicRestricted;
+}
+
+/**
+ * Changes password if client is operator
+ */
+void	Channel::setKey(Client& client, const std::string key) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	_key = key;
+}
+
+/**
+ * Changes userLimit if client is operator
+ */
+void	Channel::setUserLimit(Client& client, size_t userLimit) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	_userLimit = userLimit;
+}
+
 	/*********************
 	 * SETTERS & GETTERS *
 	 ********************/
 
-	// SETTERS
+// SETTERS
 
-	void	Channel::setName(std::string name) {
-		_name = name;
-	}
+void	Channel::setName(std::string name) {
+	_name = name;
+}
 
-	void	Channel::setTopic(std::string topic) {
-		_topic = topic;
-	}
 
-	void	Channel::setKey(const std::string key) {
-		_key = key;
-	}
+// GETTERS
 
-	void	Channel::setInvitedOnly(bool inviteOnly) {
-		_inviteOnly = inviteOnly;
-	}
+std::string&	Channel::getTopic() {
+	return _topic;
+}
 
-	void	Channel::setTopicRestricted(bool topicRestricted) {
-		_topicRestricted = topicRestricted;
-	}
+std::string&	Channel::getKey() {
+	return _key;
+}
 
-	void	Channel::setUserLimit(size_t userLimit) {
-		_userLimit = userLimit;
-	}
+bool			Channel::getInviteOnly() {
+	return _inviteOnly;
+}
 
-	// GETTERS
+bool			Channel::getTopicRestricted() {
+	return _topicRestricted;
+}
 
-	std::string&	Channel::getTopic() {
-		return _topic;
-	}
-
-	std::string&	Channel::getKey() {
-		return _key;
-	}
-
-	bool			Channel::getInviteOnly() {
-		return _inviteOnly;
-	}
-
-	bool			Channel::getTopicRestricted() {
-		return _topicRestricted;
-	}
-
-	size_t			Channel::getUserLimit() {
-		return _userLimit;
-	}
+size_t			Channel::getUserLimit() {
+	return _userLimit;
+}

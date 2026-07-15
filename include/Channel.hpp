@@ -71,14 +71,17 @@ public:
 	void	handlePart(Client& client);
 	void	handleKick(Client& kicker, Client& target);
 	void	handleInvite(Client& inviter, Client& invited);
+	void	handleOperatorinator(Client& inviter, Client& target, char action);
+
+	/* Channel Modes */
+	void	handleTopic(Client& client, std::string topic);
+	void	setInvitedOnly(Client& client, bool inviteOnly);
+	void	setTopicRestricted(Client& client, bool topicRestricted);
+	void	setKey(Client& client, const std::string key);
+	void	setUserLimit(Client& client, size_t userLimit);
 
 	/* Setters & Getters */
 	void	setName(std::string name);
-	void	setTopic(std::string topic);
-	void	setKey(const std::string key);
-	void	setInvitedOnly(bool inviteOnly);
-	void	setTopicRestricted(bool topicRestricted);
-	void	setUserLimit(size_t userLimit);
 
 	std::string&	getTopic();
 	std::string&	getKey();
