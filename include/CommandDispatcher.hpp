@@ -38,7 +38,7 @@ class CommandDispatcher {
 		void tryRegister(Server &server, Client &client);
 
     	// ---- CHANNELS ----
-    //	void handleJoin(Server &server, Client &client, const Command &cmd);
+		void handleJoin(Server &server, Client &client, const Command &cmd);
     //	void handlePart(Server &server, Client &client, const Command &cmd);
     //	void handleQuit(Server &server, Client &client, const Command &cmd);
 

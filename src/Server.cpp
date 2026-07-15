@@ -266,9 +266,30 @@ void Server::cleanup() {
 	_listen_fd = -1;
 }
 
+/***********************************************************
+ * Returns a channel from the map container.               *
+ * If it doesn't find it or the map is empty returns NULL. *
+ **********************************************************/
 Channel* Server::findChannel(const std::string& name) {
-	TODO();
-	(void)name;
+	std::map<std::string, Channel>::iterator it = _channels.find(name);
+
+	if (it == _channels.end())
+		return NULL;
+	return &it->second;
+	
+}
+
+/******************************************************
+ * Adds a new channel in the map container _channels. *
+ *****************************************************/
+Channel*	Server::addChannel(const std::string& name) {
+	Channel* target = findChannel(name);
+	if (target)
+		return target;
+
+	std::pair<std::map<std::string, Channel>::iterator, bool> inserted =
+		_channels.insert(std::make_pair(name, Channel(name)));
+	return &inserted.first->second;
 }
 
 void Server::flushClientMessages(Client& client) {

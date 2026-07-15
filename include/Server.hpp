@@ -27,7 +27,8 @@ public:
 
 	/* Channel lookup */
 
-	Channel* findChannel(const std::string& name);
+	Channel*	findChannel(const std::string& name);
+	Channel*	addChannel(const std::string& name);
 
 	/* Outgoing communication */
 

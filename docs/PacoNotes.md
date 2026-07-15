@@ -53,12 +53,31 @@ Channel suport added
 
 # 2026/07/10
 Look for the implementation of the tools made,
-	something in betwen Cristian work and mine			
-Look for mode flags +o & +t								
-Find purpouse of _topicRestricted						
+	something in betwen Cristian work and mine
+	┠─ JOIN 											✅
+Look for mode flags +o & +t								✅
+	┠─ (+/-)o -> Gives/Revokes Operator rol
+	┖─ (+/-)t -> Activates/Deactivates TopicRestricted
+Find purpouse of _topicRestricted						✅
+	┖─Only Operators can change Topic
 Find how to handle _topicRestricted. Is it mandatory?	
 Build methods to operate with _topicRestricted			
 Is it mandatory to have a topic in everychannel?		
 How we deal with add new operators? Is allowed?			
 Look how commands works. How we resolve +k +i ....		
 Look for limitations for setters						
+
+# 2026/07/15
+Touched:
+	┠─CommandDispatcher.cpp: 24 -> added:  && cmd.name!= "JOIN"
+	┠─Channel.cpp: 188 -> commented
+	┠─Server.cpp: 269 -> findChannel & addChannel
+
+
+Issues detected:
+	┠─ Register not working
+
+TODO
+	┠─ Implement TopicRestricted
+	┠─ Implement Add/Revoke Operator
+	┠─ Implement Activate/Deactivate Topic Restricted
