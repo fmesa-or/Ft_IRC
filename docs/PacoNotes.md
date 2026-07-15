@@ -69,15 +69,46 @@ Look for limitations for setters
 
 # 2026/07/15
 Touched:
-	┠─CommandDispatcher.cpp: 24 -> added:  && cmd.name!= "JOIN"
-	┠─Channel.cpp: 188 -> commented
-	┠─Server.cpp: 269 -> findChannel & addChannel
-
+	┠─ CommandDispatcher.cpp: 24 -> added:  && cmd.name!= "JOIN"
+	┠─ Channel.cpp: 188 -> commented
+	┠─ Server.cpp: 269 -> findChannel & addChannel
+	┠─ ProtocolHandlers.cpp: 20 -> handleCap
+	┠─ ChannelHandlers.cpp: buildNamesList
+	┖─ More...
 
 Issues detected:
 	┠─ Register not working
+	┠─ We are "Joining" a channel the object, but we are not joined to hexchat
+	┖─  Is the parser wrong? HexChannel says it must be "/join #PokeFans" but we are working without the '#' ('&' for local channels) UPDATE: FIXED ✅
 
 TODO
 	┠─ Implement TopicRestricted
 	┠─ Implement Add/Revoke Operator
 	┠─ Implement Activate/Deactivate Topic Restricted
+	┠─ Implement Topic creation with </topic #42 :Canal para el proyecto ft_irc>
+	┠─ Implement the JOIN for the HexChat so it will know we are in the channel		✅
+		┠─ HexChat interaction ->	C: JOIN #PokeFans
+
+									S: :nick!user@host JOIN #PokeFans
+									S: :server 331 nick #PokeFans :No topic is set
+									S: :server 353 nick = #PokeFans :@nick
+									S: :server 366 nick #PokeFans :End of /NAMES list.
+
+Notes:
+	Modes should be changed wen an operator wants with /mod <channel> <flag> <parm if needed>
+
+		MODE #42 +k hola		// Add password
+		MODE #42 +k adios		// Change password
+		MODE #42 -k				// Removes key
+
+		MODE #42 +l 10			// Changes limit
+		MODE #42 -l				// Removes limit
+
+		MODE #42 +i				// Changes mode to invitation
+		MODE #42 -i				// Setsoff invitation mode
+
+		MODE #42 +t				// Activates Topic restricted
+		MODE #42 -t				// Setsoff Topic Restricted
+--------------------------------------------------------------------
+		If a client uses TOPIC <channel> the topic must be shown
+		How to look the list of operators? Is mandatory?

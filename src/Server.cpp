@@ -37,12 +37,32 @@ void Server::sendToClient(int fd, const std::string& message) {
 	send(fd, message.c_str(), message.size(), 0);
 }
 
-void Server::sendToChannel(const Channel& channel, const std::string& message) {
-	TODO();
-	(void)channel;
-	(void)message;
+	/****************************************
+	* SEND TO CHANNEL: broadcast to members *
+	****************************************/
+void	Server::sendToChannel(const Channel& channel, const std::string& message) {
+	const std::set<Client*> &members = channel.getMembers();
+	for (std::set<Client*>::const_iterator it = members.begin(); it != members.end(); ++it) {
+		if (*it != NULL) {
+			sendToClient((*it)->getFd(), message);
+		}
+	}
 }
 
+ /******************************************************************************
+ * Accepts and registers all pending client connections on @param listening_fd *
+ *                                                                             *
+ * Loops until no more connections are pending (EAGAIN / EWOULDBLOCK).         *
+ *                                                                             *
+ * For each new connection:                                                    *
+ *  - Retrieves the client IP address.                                         *
+ *  - Sets TCP_NODELAY to disable Nagle's algorithm.                           *
+ *  - Sets the socket to non-blocking mode with O_NONBLOCK.                    *
+ *  - Registers the client fd in @param pollfds for POLLIN events.             *
+ *  - Creates and stores a new Client object in @param _clients.               *
+ *                                                                             *
+ * If setting non-blocking mode fails, the client fd is closed and skipped.    *
+ ******************************************************************************/
 void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 	while (true) {
 		sockaddr_in client_address;
@@ -289,7 +309,8 @@ Channel*	Server::addChannel(const std::string& name) {
 
 	std::pair<std::map<std::string, Channel>::iterator, bool> inserted =
 		_channels.insert(std::make_pair(name, Channel(name)));
-	return &inserted.first->second;
+
+		return &inserted.first->second;
 }
 
 void Server::flushClientMessages(Client& client) {

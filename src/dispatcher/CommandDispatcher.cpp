@@ -17,8 +17,9 @@ void CommandDispatcher::dispatch(Server &server, Client &client, const Command &
 
     if (it == _handlers.end())
     {
-        server.sendToClient(client.getFd(), "421 " + cmd.name + " :Unknown command");
-        return;
+		// Sends an IRC error message to the Client when there is an unkwon command.
+		server.sendToClient(client.getFd(), ":ft_irc 421 " + cmd.name + " :Unknown command\r\n");
+		return;
     }
 
 	if (!client.isRegistered() && cmd.name != "PASS" && cmd.name != "NICK" && cmd.name != "USER" && cmd.name!= "JOIN") {

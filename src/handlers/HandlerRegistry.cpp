@@ -12,6 +12,7 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["PASS"] = &CommandDispatcher::handlePass;
 	_handlers["NICK"] = &CommandDispatcher::handleNick;
 	_handlers["USER"] = &CommandDispatcher::handleUser;
+	_handlers["CAP"] = &CommandDispatcher::handleCap;
 
     // Channels
     _handlers["JOIN"] = &CommandDispatcher::handleJoin;
