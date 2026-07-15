@@ -6,12 +6,13 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/10 17:52:38 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/15 19:39:24 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "IRC.hpp"
 
 /***************
  * Constructor *
@@ -49,6 +50,7 @@ const std::string& Channel::getName() const {
  *********************************************************************/
 void	Channel::addMember(Client& client) {
 	addToContainer(client, _members);
+	LOG_DEBUG("Client: " << client.getNickname() << " added to " << getName());
 }
 
 /*******************************************************************
@@ -185,9 +187,9 @@ const std::set<Client*>&	Channel::getInvited() const {
  ***********************************************/
  bool	Channel::canJoin(const Client& client, const std::string& key) const {
 	// Revisar que client está registrado
-	if (!client.isRegistered()) {
-		return false; // Is not registred
-	}
+//	if (!client.isRegistered()) {
+//		return false; // Is not registred
+//	}
 	// Revisar que el cliente no está ya dentro de la lista de miembros
 	if (hasMember(client)) {
 		return false; // Already in channel

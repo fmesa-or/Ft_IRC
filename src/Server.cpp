@@ -37,12 +37,32 @@ void Server::sendToClient(int fd, const std::string& message) {
 	send(fd, message.c_str(), message.size(), 0);
 }
 
-void Server::sendToChannel(const Channel& channel, const std::string& message) {
-	TODO();
-	(void)channel;
-	(void)message;
+	/****************************************
+	* SEND TO CHANNEL: broadcast to members *
+	****************************************/
+void	Server::sendToChannel(const Channel& channel, const std::string& message) {
+	const std::set<Client*> &members = channel.getMembers();
+	for (std::set<Client*>::const_iterator it = members.begin(); it != members.end(); ++it) {
+		if (*it != NULL) {
+			sendToClient((*it)->getFd(), message);
+		}
+	}
 }
 
+ /******************************************************************************
+ * Accepts and registers all pending client connections on @param listening_fd *
+ *                                                                             *
+ * Loops until no more connections are pending (EAGAIN / EWOULDBLOCK).         *
+ *                                                                             *
+ * For each new connection:                                                    *
+ *  - Retrieves the client IP address.                                         *
+ *  - Sets TCP_NODELAY to disable Nagle's algorithm.                           *
+ *  - Sets the socket to non-blocking mode with O_NONBLOCK.                    *
+ *  - Registers the client fd in @param pollfds for POLLIN events.             *
+ *  - Creates and stores a new Client object in @param _clients.               *
+ *                                                                             *
+ * If setting non-blocking mode fails, the client fd is closed and skipped.    *
+ ******************************************************************************/
 void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 	while (true) {
 		sockaddr_in client_address;
@@ -266,9 +286,31 @@ void Server::cleanup() {
 	_listen_fd = -1;
 }
 
+/***********************************************************
+ * Returns a channel from the map container.               *
+ * If it doesn't find it or the map is empty returns NULL. *
+ **********************************************************/
 Channel* Server::findChannel(const std::string& name) {
-	TODO();
-	(void)name;
+	std::map<std::string, Channel>::iterator it = _channels.find(name);
+
+	if (it == _channels.end())
+		return NULL;
+	return &it->second;
+	
+}
+
+/******************************************************
+ * Adds a new channel in the map container _channels. *
+ *****************************************************/
+Channel*	Server::addChannel(const std::string& name) {
+	Channel* target = findChannel(name);
+	if (target)
+		return target;
+
+	std::pair<std::map<std::string, Channel>::iterator, bool> inserted =
+		_channels.insert(std::make_pair(name, Channel(name)));
+
+		return &inserted.first->second;
 }
 
 void Server::flushClientMessages(Client& client) {
