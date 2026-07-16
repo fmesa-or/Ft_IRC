@@ -192,7 +192,7 @@ const std::set<Client*>&	Channel::getInvited() const {
 	}
 	// Revisar canal lleno
 	if (_userLimit > 0 && _members.size() >= _userLimit) {
-		std::cout << "User regected: Channel reached limit." << std::endl; //debug
+		std::cout << "User rejected: Channel reached limit." << std::endl; //debug
 		return false; // Channel full
 	}
 	// Revisar invitación
