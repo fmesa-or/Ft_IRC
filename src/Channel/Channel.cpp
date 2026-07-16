@@ -197,12 +197,12 @@ const std::set<Client*>&	Channel::getInvited() const {
 	}
 	// Revisar invitación
 	if (_inviteOnly && !hasInvited(client)) {
-		std::cout << "User regected: Must be invited" << std::endl; //debug
+		std::cout << "User rejected: Must be invited" << std::endl; //debug
 		return false; // Must be invited
 	}
 	// Revisar contraseña
 	if (!_key.empty() && key != _key) {
-		std::cout << "User regected: Wrong password" << std::endl; //debug
+		std::cout << "User rejected: Wrong password" << std::endl; //debug
 		return false; // Wrong password
 	}
 	return true;
