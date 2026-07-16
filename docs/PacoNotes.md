@@ -77,7 +77,7 @@ Touched:
 	┖─ More...
 
 Issues detected:
-	┠─ Register not working
+	┠─ Register in server not working
 	┠─ We are "Joining" a channel the object, but we are not joined to hexchat ✅
 	┠─ Second clients can not join channels already made but first client can
 	┖─ Is the parser wrong? HexChannel says it must be "/join #PokeFans" but we are working without the '#' ('&' for local channels) UPDATE: FIXED just # ✅ // Need to fix &channel
@@ -113,3 +113,5 @@ Notes:
 --------------------------------------------------------------------
 		If a client uses TOPIC <channel> the topic must be shown
 		How to look the list of operators? Is mandatory?
+
+# 2026/07/16

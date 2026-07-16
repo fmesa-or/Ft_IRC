@@ -14,11 +14,15 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["USER"] = &CommandDispatcher::handleUser;
 	_handlers["CAP"] = &CommandDispatcher::handleCap;
 
-    // Channels
-    _handlers["JOIN"] = &CommandDispatcher::handleJoin;
+	// Channels
+	_handlers["JOIN"] = &CommandDispatcher::handleJoin;
 	/*
     _handlers["PART"] = &CommandDispatcher::handlePart;
     _handlers["QUIT"] = &CommandDispatcher::handleQuit;
+	_handlers["MOD"] = &CommandDispatcher::handleMod; <-
+	// KICK
+	// INVITE Nickname #channel (+i only operators / -i anyone can)
+	// TOPIC
     
     // Messaging
     _handlers["PRIVMSG"] = &CommandDispatcher::handlePrivmsg;

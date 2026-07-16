@@ -76,6 +76,8 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 	const std::string key = (cmd.params.size() > 1) ? cmd.params[1] : "";
 
 	// Comprobar que el cliente se puede unir y lo une dentro del objeto canal
+	// Revisar, porque creo que es redundante!!!!
+	// Añadir mensaje de rechazo!
 	if (!channel->canJoin(client, key))
 		return;
 
@@ -85,7 +87,7 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 		+ "@localhost JOIN " + channel->getName() + "\r\n";
 	server.sendToChannel(*channel, joinMessage);
 
-	// Unir al cliente al canal en HexChat
+	// Manda un mensaje informando del topic del canal
 	if (channel->getTopic().empty())
 	{
 		server.sendToClient(
@@ -101,12 +103,13 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 			" :" + channel->getTopic() + "\r\n");
 	}
 
-
+	// Añade cliente a la lista de nombres
 	server.sendToClient(
 		client.getFd(),
 		":ft_irc 353 " + client.getNickname() + " = " + channel->getName() +
 		" :" + buildNamesList(*channel) + "\r\n");
 
+	// Fin de la lista clientes
 	server.sendToClient(
 		client.getFd(),
 		":ft_irc 366 " + client.getNickname() + " " + channel->getName() +

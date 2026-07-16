@@ -37,9 +37,9 @@ void Server::sendToClient(int fd, const std::string& message) {
 	send(fd, message.c_str(), message.size(), 0);
 }
 
-	/****************************************
-	* SEND TO CHANNEL: broadcast to members *
-	****************************************/
+/****************************************
+* SEND TO CHANNEL: broadcast to members *
+****************************************/
 void	Server::sendToChannel(const Channel& channel, const std::string& message) {
 	const std::set<Client*> &members = channel.getMembers();
 	for (std::set<Client*>::const_iterator it = members.begin(); it != members.end(); ++it) {
