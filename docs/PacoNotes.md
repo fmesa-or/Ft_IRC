@@ -84,8 +84,8 @@ Issues detected:
 
 TODO
 	┠─ Implement TopicRestricted													
-	┠─ Implement Add/Revoke Operator												
-	┠─ Implement Activate/Deactivate Topic Restricted								
+	┠─ Implement Add/Revoke Operator												✅
+	┠─ Implement Activate/Deactivate Topic Restricted								✅
 	┠─ Implement Topic creation with </topic #42 :Canal para el proyecto ft_irc>	
 	┠─ Implement the JOIN for the HexChat so it will know we are in the channel		✅
 		┠─ HexChat interaction ->	C: JOIN #PokeFans

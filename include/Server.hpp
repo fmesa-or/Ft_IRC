@@ -39,6 +39,8 @@ public:
 
 	void cleanup();
 
+	void completeClientRegistration(Client &client);
+
 private:
 
 	int         _port;

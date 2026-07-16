@@ -6,13 +6,14 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/16 14:12:06 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/16 17:22:41 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "IRC.hpp"
+#include <cstdlib>
 
 /***************
  * Constructor *
@@ -357,18 +358,35 @@ void	Channel::setKey(Client& client, const Command &cmd) {
 		}
 	} else
 		// Error: Bad mode key input
-			LOG_DEBUG("PASWORD ERROR: " << cmd.params[2]);
+		LOG_DEBUG("PASWORD ERROR: " << cmd.params[2]);
 }
 
 /**
  * Changes userLimit if client is operator
  */
-void	Channel::setUserLimit(Client& client, size_t userLimit) {
-	if (!isOperator(client)){
-		// Not operator -> hexChat
+void	Channel::setUserLimit(Client& client, const Command &cmd) {
+	if (!isOperator(client)) {
+		// ERR_CHANOPRIVSNEEDED (482) — Person B sends numeric
 		return;
 	}
-	_userLimit = userLimit;
+	if (cmd.params[1][0] == '+') {
+		if (cmd.params.size() < 3) {
+			LOG_DEBUG("LIMIT ERROR: need a value");
+			return;
+		}
+		int limit = atoi(cmd.params[2].c_str());
+		if (limit <= 0) {
+			LOG_DEBUG("LIMIT ERROR: invalid value");
+			return;
+		}
+		_userLimit = static_cast<size_t>(limit);
+		LOG_DEBUG("USERLIMIT ADDED: " << _userLimit);
+	} else if (cmd.params[1][0] == '-') {
+		_userLimit = 0;
+		LOG_DEBUG("USERLIMIT REMOVED");
+	} else {
+		LOG_DEBUG("LIMIT ERROR: bad mode flag");
+	}
 }
 
 	/*********************

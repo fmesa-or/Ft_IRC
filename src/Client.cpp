@@ -4,13 +4,16 @@ Client::Client() :
 	_fd(-1),
 	_has_password(false),
 	_has_nickname(false),
-	_has_username(false) {}
+	_has_username(false),
+	_registration_completed(false) {}
+
 
 Client::Client(int fd) :
 	_fd(fd),
 	_has_password(false),
 	_has_nickname(false),
-	_has_username(false) {}
+	_has_username(false),
+	_registration_completed(false) {}
 
 
 std::string& Client::getRecvBuffer() {
@@ -74,6 +77,13 @@ void Client::setHasUsername(bool value) {
 	_has_username = value;
 }
 
+bool Client::getRegistrationCompleted() const {
+	return (_registration_completed);
+} 
+
+void Client::setRegistrationCompleted(bool value) {
+	_registration_completed = value;
+}
 
 // NOTE: Should we buffer client messages?
 // void Client::queueMessage(const std::string& message) {

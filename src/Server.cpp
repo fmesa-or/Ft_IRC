@@ -5,6 +5,7 @@
 #include "Command.hpp"
 #include "CommandDispatcher.hpp"
 #include "Parser.hpp"
+#include "Replies.hpp"
 
 #include <sys/socket.h>
 #include <cstring>
@@ -108,6 +109,15 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 			LOG_DEBUG("Client connected from " << ip_string);
 		}
 	}
+}
+
+void Server::completeClientRegistration(Client &client) {
+	if (!client.isRegistered())
+		return;
+	if (client.getRegistrationCompleted())
+		return;
+	client.setRegistrationCompleted(true);
+	sendToClient(client.getFd(), Replies::welcome(client));
 }
 
 bool Server::disconnectClient(int fd, size_t pollfds_idx) {

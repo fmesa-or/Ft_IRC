@@ -28,8 +28,9 @@ void CommandDispatcher::registerHandlers() {
     _handlers["PRIVMSG"] = &CommandDispatcher::handlePrivmsg;
     _handlers["NOTICE"]  = &CommandDispatcher::handleNotice;
     
-    // Protocol
-    _handlers["PING"] = &CommandDispatcher::handlePing;
     _handlers["PONG"] = &CommandDispatcher::handlePong;
 	*/
+	// Protocol
+	_handlers["PING"] = &CommandDispatcher::handlePing;
+	_handlers["WHO"] = &CommandDispatcher::handleWho;
 }

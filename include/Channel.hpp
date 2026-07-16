@@ -79,7 +79,7 @@ public:
 	void	setInvitedOnly(Client& client, bool inviteOnly);
 	void	setTopicRestricted(Client& client, bool topicRestricted);
 	void	setKey(Client& client, const Command &cmd);
-	void	setUserLimit(Client& client, size_t userLimit);
+	void	setUserLimit(Client& client, const Command &cmd);
 
 	/* Setters & Getters */
 	void	setName(std::string name);
