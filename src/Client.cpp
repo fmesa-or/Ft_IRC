@@ -56,9 +56,9 @@ bool Client::hasUsername() const {
 bool Client::isRegistered() const {
 	if (_has_password && _has_nickname && _has_username) {
 		return true;
-	} else {
-		return false;
 	}
+	else
+		return false;
 }
 
 
