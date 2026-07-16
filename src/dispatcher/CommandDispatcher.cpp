@@ -22,10 +22,11 @@ void CommandDispatcher::dispatch(Server &server, Client &client, const Command &
 		return;
     }
 
-	if (!client.isRegistered() && cmd.name != "PASS" && cmd.name != "NICK" && cmd.name != "USER" && cmd.name!= "JOIN") {
-        server.sendToClient(client.getFd(), Replies::notRegistered(client));
-        return;
-    }
+	if (!client.isRegistered() && cmd.name != "PASS" && cmd.name != "NICK" && cmd.name != "USER" 
+		&& cmd.name!= "JOIN" && cmd.name!= "MODE") {
+		server.sendToClient(client.getFd(), Replies::notRegistered(client));
+		return;
+	}
 
     Handler h = it->second;
 

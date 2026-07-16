@@ -4,6 +4,7 @@
 # include <string>
 # include <set>
 # include <iostream>
+# include "Command.hpp"
 
 
 class Client;
@@ -16,14 +17,14 @@ private:
 	std::string			_topic;
 
 	std::set<Client*>	_members;
-	std::set<Client*>	_operators;
+	std::set<Client*>	_operators;	// +o
 
-	std::string			_key;		//+k
-	std::set<Client*>	_invited;	//+i
+	std::string			_key;		// +k
+	std::set<Client*>	_invited;
 
-	bool				_inviteOnly;
-	bool				_topicRestricted;
-	size_t				_userLimit;	//+l | 0 = Limitless
+	bool				_inviteOnly;	// +i
+	bool				_topicRestricted;	// +t
+	size_t				_userLimit;	// +l | 0 = Limitless
 
 	/* Templates */
 	template <typename Container>
@@ -77,7 +78,7 @@ public:
 	void	handleTopic(Client& client, std::string topic);
 	void	setInvitedOnly(Client& client, bool inviteOnly);
 	void	setTopicRestricted(Client& client, bool topicRestricted);
-	void	setKey(Client& client, const std::string key);
+	void	setKey(Client& client, const Command &cmd);
 	void	setUserLimit(Client& client, size_t userLimit);
 
 	/* Setters & Getters */

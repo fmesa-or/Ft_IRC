@@ -16,10 +16,10 @@ void CommandDispatcher::registerHandlers() {
 
 	// Channels
 	_handlers["JOIN"] = &CommandDispatcher::handleJoin;
+	_handlers["MODE"] = &CommandDispatcher::handleMode;
 	/*
     _handlers["PART"] = &CommandDispatcher::handlePart;
     _handlers["QUIT"] = &CommandDispatcher::handleQuit;
-	_handlers["MOD"] = &CommandDispatcher::handleMod; <-
 	// KICK
 	// INVITE Nickname #channel (+i only operators / -i anyone can)
 	// TOPIC

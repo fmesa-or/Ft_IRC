@@ -110,6 +110,13 @@ Notes:
 
 		MODE #42 +t				// Activates Topic restricted
 		MODE #42 -t				// Setsoff Topic Restricted
+
+		MODE #42 +o nickname	// Add client to operators
+		MODE #42 -o nickname	// Removes operator
+
+
+		MODE #42 -b nickname	// Add client to restricted list in channel
+		(I don't know if it's mandatory)
 --------------------------------------------------------------------
 		If a client uses TOPIC <channel> the topic must be shown
 		How to look the list of operators? Is mandatory?

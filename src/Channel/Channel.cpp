@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/15 22:31:20 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/16 14:12:06 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -337,12 +337,27 @@ void	Channel::setTopicRestricted(Client& client, bool topicRestricted) {
 /**
  * Changes password if client is operator
  */
-void	Channel::setKey(Client& client, const std::string key) {
+void	Channel::setKey(Client& client, const Command &cmd) {
 	if (!isOperator(client)){
 		// Not operator -> hexChat
 		return;
 	}
-	_key = key;
+	// Check if adds or removes key
+	if (cmd.params[1][0] == '+') {
+		_key = cmd.params[2];
+		LOG_DEBUG("PASWORD ADDED: " << cmd.params[2]);
+	} else if (cmd.params[1][0] == '-') {
+		if (cmd.params[2] != _key) {
+			// Error: Need the actual password to remove it. 
+			LOG_DEBUG("PASWORD NOT REMOVED: Incorrect pasword: " << cmd.params[2]);
+			return;
+		} else {
+			_key = "";
+			LOG_DEBUG("PASWORD REMOVED: " << _key);
+		}
+	} else
+		// Error: Bad mode key input
+			LOG_DEBUG("PASWORD ERROR: " << cmd.params[2]);
 }
 
 /**

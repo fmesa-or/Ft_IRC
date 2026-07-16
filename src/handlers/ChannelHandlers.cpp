@@ -118,6 +118,63 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 
 
 }
+
+/**
+ * Inputs: /mod <#channel> <mode> <argmnts>
+ */
+void CommandDispatcher::handleMode(Server &server, Client &client, const Command &cmd)
+{
+	LOG_DEBUG("CHECK");
+
+	// Check if empty params
+	if (cmd.params.empty()) {
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "JOIN"));
+		return;
+	}
+
+	// Check if channel is valid
+	if (!isValidChannelName(cmd.params[0])) {
+		server.sendToClient(
+			client.getFd(),
+			":ft_irc 476 " + client.getNickname() + " " + cmd.params[0] +
+			" :Bad Channel Mask\r\n");
+		return;
+	}
+
+	// Check if channel exist
+	Channel*	channel = server.findChannel(cmd.params[0]);
+	if (!channel) {
+		// Comunicate with client (hexChat)
+		return ;
+	}
+
+	// Sends to especific mod handler
+	char		mode = cmd.params[1][1]; // Ignoring the +/- simbol
+
+
+	switch (mode) {
+		case 'k':
+			if (cmd.params.size() < 3) {
+				// Message to Client: Not enought params
+				return;
+			}
+			channel->setKey(client, cmd);
+			break;
+		case 'l':
+			break;
+		case 'i':
+			break;
+		case 't':
+			break;
+		case 'o':
+			break;
+	}
+
+	// If no mod founded returns an error (mod is not implemented)
+}
+
+
+
 /*
 void CommandDispatcher::handlePart(Server &, Client &, const Command &)
 {
