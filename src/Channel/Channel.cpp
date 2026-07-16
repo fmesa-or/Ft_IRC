@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/16 17:22:41 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/16 19:56:22 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,11 +305,7 @@ void	Channel::handleOperatorinator(Client& inviter, Client& target, char action)
  * Changes Topic to a new one.
  * If restricted only Operators can change it. *
  */
-void	Channel::handleTopic(Client& client, std::string topic) {
-	if (_topicRestricted && !isOperator(client)) {
-		// Must comunicate con hexchat that topic restricted is on and client isn't an operator
-		return;
-	}
+void	Channel::setTopic(std::string topic) {
 	_topic = topic;
 }
 

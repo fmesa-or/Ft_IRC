@@ -264,7 +264,66 @@ void	CommandDispatcher::handleWho(Server &server, Client &client, const Command 
 		":ft_irc 315 " + client.getNickname() + " " + target + " :End of /WHO list.\r\n");
 }
 
+/**
+ * 
+ */
+void	CommandDispatcher::handleTopic(Server &server, Client &client, const Command &cmd) {
 
+	// Check params
+	if (cmd.params.empty()) {
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "TOPIC"));
+		return;
+	}
+
+	// Checks if channel exist
+	const std::string& target = cmd.params[0];
+	Channel* channel = server.findChannel(target);
+
+	 if (!channel) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 403 " + client.getNickname() + " " + target + " :No such channel\r\n");
+		return;
+	}
+
+	// Checks if we recieve a topic and can be overwrited by the client
+	if (cmd.params.size() > 1) {
+		if (channel->getTopicRestricted() && !channel->isOperator(client)) {
+			server.sendToClient(client.getFd(),
+				":ft_irc 482 " + client.getNickname() + " " + target +
+				" :You're not channel operator\r\n");
+			return;
+		}
+		// Agrupates all the params forming the topic
+		std::string newTopic = cmd.params[1];
+		for (size_t i = 2; i < cmd.params.size(); i++)
+			newTopic += " " + cmd.params[i];
+
+		// Changes topic
+		if (newTopic == "-") {
+			channel->setTopic("");
+		} else {
+			channel->setTopic(newTopic);
+
+			// Shows topic to client
+			server.sendToChannel(*channel,
+				":" + client.getNickname() + "!" + client.getUsername() +
+				"@localhost TOPIC " + target + " :" + newTopic + "\r\n");
+			return;
+		}
+
+	}
+
+	// Checks the actual topic
+	if (channel->getTopic().empty()) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 331 " + client.getNickname() + " " + target + " :No topic is set\r\n");
+	} else {
+		server.sendToClient(client.getFd(),
+			":ft_irc 332 " + client.getNickname() + " " + target +
+			" :" + channel->getTopic() + "\r\n");
+	}
+
+}
 
 
 /*

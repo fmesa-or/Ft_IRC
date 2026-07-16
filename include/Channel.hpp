@@ -75,7 +75,7 @@ public:
 	void	handleOperatorinator(Client& inviter, Client& target, char action);
 
 	/* Channel Modes */
-	void	handleTopic(Client& client, std::string topic);
+	void	setTopic(std::string topic);
 	void	setInvitedOnly(Client& client, bool inviteOnly);
 	void	setTopicRestricted(Client& client, bool topicRestricted);
 	void	setKey(Client& client, const Command &cmd);
