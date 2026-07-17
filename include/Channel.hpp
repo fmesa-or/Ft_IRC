@@ -6,7 +6,7 @@
 # include <iostream>
 # include "Command.hpp"
 
-
+class Server;
 class Client;
 
 class Channel
@@ -77,8 +77,8 @@ public:
 	/* Channel Modes */
 	void	setTopic(std::string topic);
 	void	setInvitedOnly(Client& client, bool inviteOnly);
-	void	setTopicRestricted(Client& client, bool topicRestricted);
-	void	setKey(Client& client, const Command &cmd);
+	void	setTopicRestricted(Server &server, Client &client, bool topicRestricted, Command cmd);
+	void	setKey(Server &server, Client &client, Command cmd);
 	void	setUserLimit(Client& client, const Command &cmd);
 
 	/* Setters & Getters */

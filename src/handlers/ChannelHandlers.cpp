@@ -173,12 +173,7 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 		case 'k':
 			if (cmd.params.size() < 3)
 				return;
-			channel->setKey(client, cmd);
-			// Notify all members in channel
-			server.sendToChannel(*channel,
-				":" + client.getNickname() + "!" + client.getUsername() +
-				"@localhost MODE " + channel->getName() + " " +
-				cmd.params[1] + " " + cmd.params[2] + "\r\n");
+			channel->setKey(server, client, cmd);
 			break;
 		case 'l':
 			channel->setUserLimit(client, cmd);
@@ -199,11 +194,7 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 		}
 		case 't': {
 			bool enable = cmd.params[1][0] == '+';
-			channel->setTopicRestricted(client, enable);
-			server.sendToChannel(*channel,
-				":" + client.getNickname() + "!" + client.getUsername() +
-				"@localhost MODE " + channel->getName() + " " +
-				cmd.params[1] + "\r\n");
+			channel->setTopicRestricted(server, client, enable, cmd);
 			break;
 		}
 		case 'o': {

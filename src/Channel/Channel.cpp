@@ -6,13 +6,14 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/16 19:56:22 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/17 12:45:51 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "IRC.hpp"
+#include "Server.hpp"
 #include <cstdlib>
 
 /***************
@@ -323,20 +324,29 @@ void	Channel::setInvitedOnly(Client& client, bool inviteOnly) {
 /**
  * Changes topicRestricted mode if client is operator
  */
-void	Channel::setTopicRestricted(Client& client, bool topicRestricted) {
-	if (!isOperator(client)){
-		// Not operator -> hexChat
+void	Channel::setTopicRestricted(Server &server, Client &client, bool topicRestricted, Command cmd) {
+	if (!(isOperator(client))){
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + getName() +
+			" :You're not channel operator\r\n");
 		return;
 	}
 	_topicRestricted = topicRestricted;
+	server.sendToChannel(*this,
+	":" + client.getNickname() + "!" + client.getUsername() +
+	"@localhost MODE " + getName() + " " +
+	cmd.params[1] + "\r\n");
 }
 
 /**
  * Changes password if client is operator
+ * //////////////////////ESTOY ARREGLANDO ESTO
  */
-void	Channel::setKey(Client& client, const Command &cmd) {
+void	Channel::setKey(Server &server, Client &client, Command cmd) {
 	if (!isOperator(client)){
-		// Not operator -> hexChat
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + getName() +
+			" :You're not channel operator\r\n");
 		return;
 	}
 	// Check if adds or removes key
@@ -352,9 +362,14 @@ void	Channel::setKey(Client& client, const Command &cmd) {
 			_key = "";
 			LOG_DEBUG("PASWORD REMOVED: " << _key);
 		}
-	} else
+	} else {
 		// Error: Bad mode key input
 		LOG_DEBUG("PASWORD ERROR: " << cmd.params[2]);
+	}
+	
+	server.sendToChannel(*this, ":" + client.getNickname() + "!" + client.getUsername() +
+	"@localhost MODE " + this->getName() + " " +
+	cmd.params[1] + " " + cmd.params[2] + "\r\n");
 }
 
 /**
