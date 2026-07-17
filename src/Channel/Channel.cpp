@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/17 12:45:51 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/17 15:21:36 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,20 +287,47 @@ void	Channel::handleInvite(Client& inviter, Client& target) {
  * Checks if the invitator is an Operator      *
  * 	Then checks the action add(+) or remove(-) *
  **********************************************/
-void	Channel::handleOperatorinator(Client& inviter, Client& target, char action) {
-	if (isOperator(inviter)) {
-		if (action == '+') {
-			addOperator(target);
-		}
-		if (action == '-') {
-			removeOperator(target);
-		}
+void Channel::handleOperatorinator(Server& server, Client& client, Command cmd) {
+	if (cmd.params.size() < 3) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 461 " + client.getNickname() + " MODE :Not enough parameters\r\n");
+		return;
+	}
+
+	// Client not found or not member of channel
+	Client* target = server.findClientByNick(cmd.params[2]);
+	if (!target) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 401 " + client.getNickname() + " " + cmd.params[2] +
+			" :No such nick\r\n");
+		return;
+	}
+	if (!hasMember(*target)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 441 " + client.getNickname() + " " + cmd.params[2] +
+			" " + getName() + " :They aren't on that channel\r\n");
+		return;
+	}
+
+	if (!isOperator(client)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + getName() +
+			" :You're not channel operator\r\n");
+		return;
+	}
+
+	if (cmd.params[1][0] == '+') {
+		addOperator(*target);
+		server.sendToChannel(*this,
+			":" + client.getNickname() + "!" + client.getUsername() +
+			"@localhost MODE " + getName() + " +o " + cmd.params[2] + "\r\n");
+	} else if (cmd.params[1][0] == '-') {
+		removeOperator(*target);
+		server.sendToChannel(*this,
+			":" + client.getNickname() + "!" + client.getUsername() +
+			"@localhost MODE " + getName() + " -o " + cmd.params[2] + "\r\n");
 	}
 }
-
-	/*****************
-	 * CHANNEL MODES *
-	 ****************/
 
 /**
  * Changes Topic to a new one.
@@ -310,28 +337,38 @@ void	Channel::setTopic(std::string topic) {
 	_topic = topic;
 }
 
+	/*****************
+	 * CHANNEL MODES *
+	 ****************/
+
 /**
  * Changes inviteOnly mode if client is operator
  */
-void	Channel::setInvitedOnly(Client& client, bool inviteOnly) {
+void	Channel::setInvitedOnly(Server& server, Client& client, Command cmd) {
 	if (!isOperator(client)){
-		// Not operator -> hexChat
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + getName() +
+			" :You're not channel operator\r\n");
 		return;
 	}
-	_inviteOnly = inviteOnly;
+	_inviteOnly = cmd.params[1][0] == '+';
+	server.sendToChannel(*this,
+		":" + client.getNickname() + "!" + client.getUsername() +
+		"@localhost MODE " + this->getName() + " " +
+		cmd.params[1] + "\r\n");
 }
 
 /**
  * Changes topicRestricted mode if client is operator
  */
-void	Channel::setTopicRestricted(Server &server, Client &client, bool topicRestricted, Command cmd) {
+void	Channel::setTopicRestricted(Server& server, Client& client, Command cmd) {
 	if (!(isOperator(client))){
 		server.sendToClient(client.getFd(),
 			":ft_irc 482 " + client.getNickname() + " " + getName() +
 			" :You're not channel operator\r\n");
 		return;
 	}
-	_topicRestricted = topicRestricted;
+	_topicRestricted = cmd.params[1][0] == '+';
 	server.sendToChannel(*this,
 	":" + client.getNickname() + "!" + client.getUsername() +
 	"@localhost MODE " + getName() + " " +
@@ -340,9 +377,13 @@ void	Channel::setTopicRestricted(Server &server, Client &client, bool topicRestr
 
 /**
  * Changes password if client is operator
- * //////////////////////ESTOY ARREGLANDO ESTO
  */
 void	Channel::setKey(Server &server, Client &client, Command cmd) {
+	if (cmd.params.size() < 3) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 461 " + client.getNickname() + " MODE :Not enough parameters\r\n");
+		return;
+	}
 	if (!isOperator(client)){
 		server.sendToClient(client.getFd(),
 			":ft_irc 482 " + client.getNickname() + " " + getName() +
@@ -355,18 +396,18 @@ void	Channel::setKey(Server &server, Client &client, Command cmd) {
 		LOG_DEBUG("PASWORD ADDED: " << cmd.params[2]);
 	} else if (cmd.params[1][0] == '-') {
 		if (cmd.params[2] != _key) {
-			// Error: Need the actual password to remove it. 
-			LOG_DEBUG("PASWORD NOT REMOVED: Incorrect pasword: " << cmd.params[2]);
+			server.sendToClient(client.getFd(),
+				":ft_irc 464 " + client.getNickname() + " :Password incorrect\r\n");
 			return;
 		} else {
 			_key = "";
-			LOG_DEBUG("PASWORD REMOVED: " << _key);
 		}
 	} else {
-		// Error: Bad mode key input
-		LOG_DEBUG("PASWORD ERROR: " << cmd.params[2]);
+		server.sendToClient(client.getFd(),
+			":ft_irc 472 " + client.getNickname() + " :Unknown mode flag\r\n");
+		return;
 	}
-	
+
 	server.sendToChannel(*this, ":" + client.getNickname() + "!" + client.getUsername() +
 	"@localhost MODE " + this->getName() + " " +
 	cmd.params[1] + " " + cmd.params[2] + "\r\n");
@@ -375,28 +416,41 @@ void	Channel::setKey(Server &server, Client &client, Command cmd) {
 /**
  * Changes userLimit if client is operator
  */
-void	Channel::setUserLimit(Client& client, const Command &cmd) {
+void	Channel::setUserLimit(Server &server, Client &client, Command cmd) {
 	if (!isOperator(client)) {
-		// ERR_CHANOPRIVSNEEDED (482) — Person B sends numeric
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + getName() +
+			" :You're not channel operator\r\n");
 		return;
 	}
 	if (cmd.params[1][0] == '+') {
 		if (cmd.params.size() < 3) {
-			LOG_DEBUG("LIMIT ERROR: need a value");
-			return;
+		server.sendToClient(client.getFd(),
+			":ft_irc 461 " + client.getNickname() +
+			" MODE :Not enough parameters\r\n");
+		return;
 		}
 		int limit = atoi(cmd.params[2].c_str());
 		if (limit <= 0) {
-			LOG_DEBUG("LIMIT ERROR: invalid value");
+			server.sendToClient(client.getFd(),
+				":ft_irc 696 " + client.getNickname() + " " + getName() +
+				" l :Invalid limit value\r\n");
 			return;
 		}
 		_userLimit = static_cast<size_t>(limit);
-		LOG_DEBUG("USERLIMIT ADDED: " << _userLimit);
+		server.sendToChannel(*this,
+			":" + client.getNickname() + "!" + client.getUsername() +
+			"@localhost MODE " + this->getName() + " " +
+			cmd.params[1] +
+			(cmd.params.size() > 2 ? " " + cmd.params[2] : "") + "\r\n");
 	} else if (cmd.params[1][0] == '-') {
 		_userLimit = 0;
-		LOG_DEBUG("USERLIMIT REMOVED");
+		server.sendToChannel(*this,
+			":" + client.getNickname() + "!" + client.getUsername() +
+			"@localhost MODE " + getName() + " -l\r\n");
 	} else {
-		LOG_DEBUG("LIMIT ERROR: bad mode flag");
+		server.sendToClient(client.getFd(),
+			":ft_irc 472 " + client.getNickname() + " l :Unknown mode flag\r\n");
 	}
 }
 

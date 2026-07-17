@@ -122,5 +122,6 @@ Notes:
 		How to look the list of operators? Is mandatory?
 
 # 2026/07/17
-Finish setKey on Channel.cpp
-Finish and Fix HandleMode on channelHandlers.cpp
+Finish setKey on Channel.cpp						✅
+Finish and Fix HandleMode on channelHandlers.cpp	
+Finish topic command implementation					✅

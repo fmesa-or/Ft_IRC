@@ -72,14 +72,14 @@ public:
 	void	handlePart(Client& client);
 	void	handleKick(Client& kicker, Client& target);
 	void	handleInvite(Client& inviter, Client& invited);
-	void	handleOperatorinator(Client& inviter, Client& target, char action);
+	void	handleOperatorinator(Server& server, Client& client, Command cmd);
 
 	/* Channel Modes */
 	void	setTopic(std::string topic);
-	void	setInvitedOnly(Client& client, bool inviteOnly);
-	void	setTopicRestricted(Server &server, Client &client, bool topicRestricted, Command cmd);
+	void	setInvitedOnly(Server& server, Client& client, Command cmd);
+	void	setTopicRestricted(Server& server, Client& client, Command cmd);
 	void	setKey(Server &server, Client &client, Command cmd);
-	void	setUserLimit(Client& client, const Command &cmd);
+	void	setUserLimit(Server &server, Client &client, Command cmd);
 
 	/* Setters & Getters */
 	void	setName(std::string name);

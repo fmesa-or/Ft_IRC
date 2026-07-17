@@ -5,6 +5,7 @@
 #include "Replies.hpp"
 #include <iostream>
 #include <sstream>
+#include <cctype>
 
  /******************************************************************************
  * Builds the names list string for a @param channel.                          *
@@ -171,47 +172,28 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 
 	switch (mode) {
 		case 'k':
-			if (cmd.params.size() < 3)
-				return;
 			channel->setKey(server, client, cmd);
 			break;
 		case 'l':
-			channel->setUserLimit(client, cmd);
-			server.sendToChannel(*channel,
-				":" + client.getNickname() + "!" + client.getUsername() +
-				"@localhost MODE " + channel->getName() + " " +
-				cmd.params[1] +
-				(cmd.params.size() > 2 ? " " + cmd.params[2] : "") + "\r\n");
+			channel->setUserLimit(server, client, cmd);
 			break;
 		case 'i': {
-			bool enable = cmd.params[1][0] == '+';
-			channel->setInvitedOnly(client, enable);
-			server.sendToChannel(*channel,
-				":" + client.getNickname() + "!" + client.getUsername() +
-				"@localhost MODE " + channel->getName() + " " +
-				cmd.params[1] + "\r\n");
+			channel->setInvitedOnly(server, client, cmd);
 			break;
 		}
 		case 't': {
-			bool enable = cmd.params[1][0] == '+';
-			channel->setTopicRestricted(server, client, enable, cmd);
+			channel->setTopicRestricted(server, client, cmd);
 			break;
 		}
 		case 'o': {
-			if (cmd.params.size() < 3)
-				return;
-			Client* target = server.findClientByNick(cmd.params[2]);
-			if (!target || !channel->hasMember(*target))
-				return;
-			channel->handleOperatorinator(client, *target, cmd.params[1][0]);
-			server.sendToChannel(*channel,
-				":" + client.getNickname() + "!" + client.getUsername() +
-				"@localhost MODE " + channel->getName() + " " +
-				cmd.params[1] + " " + cmd.params[2] + "\r\n");
+			channel->handleOperatorinator(server, client, cmd);
 			break;
 		}
 	}
 	// If no mod founded returns an error (mod is not implemented)
+	server.sendToClient(client.getFd(),
+		":ft_irc 472 " + client.getNickname() + " " + cmd.params[1] +
+		" :is unknown mode char to me\r\n");
 }
 
  /**************************************************************************
@@ -289,19 +271,28 @@ void	CommandDispatcher::handleTopic(Server &server, Client &client, const Comman
 		for (size_t i = 2; i < cmd.params.size(); i++)
 			newTopic += " " + cmd.params[i];
 
-		// Changes topic
-		if (newTopic == "-") {
-			channel->setTopic("");
-		} else {
-			channel->setTopic(newTopic);
+		if (newTopic == "remove") {
+			newTopic = "";
+		}
 
-			// Shows topic to client
+		channel->setTopic(newTopic);
+
+		if (newTopic.empty()) {
+				// Broadcast to everyone that the topic has changed
+				server.sendToChannel(*channel,
+					":" + client.getNickname() + "!" + client.getUsername() +
+					"@localhost TOPIC " + target + " :\r\n");
+
+					// Confirms client with 331
+				server.sendToClient(client.getFd(),
+					":ft_irc 331 " + client.getNickname() + " " + target +
+					" :No topic is set\r\n");
+		} else {
 			server.sendToChannel(*channel,
 				":" + client.getNickname() + "!" + client.getUsername() +
 				"@localhost TOPIC " + target + " :" + newTopic + "\r\n");
-			return;
 		}
-
+		return;
 	}
 
 	// Checks the actual topic
