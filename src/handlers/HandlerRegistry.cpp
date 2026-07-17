@@ -14,18 +14,24 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["USER"] = &CommandDispatcher::handleUser;
 	_handlers["CAP"] = &CommandDispatcher::handleCap;
 
-    // Channels
-    _handlers["JOIN"] = &CommandDispatcher::handleJoin;
+	// Channels
+	_handlers["JOIN"] = &CommandDispatcher::handleJoin;
+	_handlers["MODE"] = &CommandDispatcher::handleMode;
+	_handlers["TOPIC"] = &CommandDispatcher::handleTopic;
+
 	/*
     _handlers["PART"] = &CommandDispatcher::handlePart;
     _handlers["QUIT"] = &CommandDispatcher::handleQuit;
+	// KICK
+	// INVITE Nickname #channel (+i only operators / -i anyone can)
     
     // Messaging
     _handlers["PRIVMSG"] = &CommandDispatcher::handlePrivmsg;
     _handlers["NOTICE"]  = &CommandDispatcher::handleNotice;
     
-    // Protocol
-    _handlers["PING"] = &CommandDispatcher::handlePing;
     _handlers["PONG"] = &CommandDispatcher::handlePong;
 	*/
+	// Protocol
+	_handlers["PING"] = &CommandDispatcher::handlePing;
+	_handlers["WHO"] = &CommandDispatcher::handleWho;
 }

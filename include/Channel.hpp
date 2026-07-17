@@ -4,6 +4,7 @@
 # include <string>
 # include <set>
 # include <iostream>
+# include "Command.hpp"
 
 
 class Client;
@@ -16,14 +17,14 @@ private:
 	std::string			_topic;
 
 	std::set<Client*>	_members;
-	std::set<Client*>	_operators;
+	std::set<Client*>	_operators;	// +o
 
-	std::string			_key;		//+k
-	std::set<Client*>	_invited;	//+i
+	std::string			_key;		// +k
+	std::set<Client*>	_invited;
 
-	bool				_inviteOnly;
-	bool				_topicRestricted;
-	size_t				_userLimit;	//+l | 0 = Limitless
+	bool				_inviteOnly;	// +i
+	bool				_topicRestricted;	// +t
+	size_t				_userLimit;	// +l | 0 = Limitless
 
 	/* Templates */
 	template <typename Container>
@@ -71,14 +72,17 @@ public:
 	void	handlePart(Client& client);
 	void	handleKick(Client& kicker, Client& target);
 	void	handleInvite(Client& inviter, Client& invited);
+	void	handleOperatorinator(Client& inviter, Client& target, char action);
+
+	/* Channel Modes */
+	void	setTopic(std::string topic);
+	void	setInvitedOnly(Client& client, bool inviteOnly);
+	void	setTopicRestricted(Client& client, bool topicRestricted);
+	void	setKey(Client& client, const Command &cmd);
+	void	setUserLimit(Client& client, const Command &cmd);
 
 	/* Setters & Getters */
 	void	setName(std::string name);
-	void	setTopic(std::string topic);
-	void	setKey(const std::string key);
-	void	setInvitedOnly(bool inviteOnly);
-	void	setTopicRestricted(bool topicRestricted);
-	void	setUserLimit(size_t userLimit);
 
 	std::string&	getTopic();
 	std::string&	getKey();

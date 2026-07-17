@@ -39,6 +39,8 @@ class CommandDispatcher {
 
     	// ---- CHANNELS ----
 		void handleJoin(Server &server, Client &client, const Command &cmd);
+		void handleMode(Server &server, Client &client, const Command &cmd);
+		void handleTopic(Server &server, Client &client, const Command &cmd);
     //	void handlePart(Server &server, Client &client, const Command &cmd);
     //	void handleQuit(Server &server, Client &client, const Command &cmd);
 
@@ -49,7 +51,9 @@ class CommandDispatcher {
     	// ---- PROTOCOL ----
 		//Envía un mensaje IRC de error al cliente que mandó un comando desconocido.
 		void handleCap(Server &server, Client &client, const Command &cmd);
-    //	void handlePing(Server &server, Client &client, const Command &cmd);
+		void handlePing(Server &server, Client &client, const Command &cmd);
+		void handleWho(Server &server, Client &client, const Command &cmd);
+
     //	void handlePong(Server &server, Client &client, const Command &cmd);
 };
 

@@ -5,6 +5,7 @@
 #include "Command.hpp"
 #include "CommandDispatcher.hpp"
 #include "Parser.hpp"
+#include "Replies.hpp"
 
 #include <sys/socket.h>
 #include <cstring>
@@ -37,9 +38,9 @@ void Server::sendToClient(int fd, const std::string& message) {
 	send(fd, message.c_str(), message.size(), 0);
 }
 
-	/****************************************
-	* SEND TO CHANNEL: broadcast to members *
-	****************************************/
+/****************************************
+* SEND TO CHANNEL: broadcast to members *
+****************************************/
 void	Server::sendToChannel(const Channel& channel, const std::string& message) {
 	const std::set<Client*> &members = channel.getMembers();
 	for (std::set<Client*>::const_iterator it = members.begin(); it != members.end(); ++it) {
@@ -108,6 +109,15 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 			LOG_DEBUG("Client connected from " << ip_string);
 		}
 	}
+}
+
+void Server::completeClientRegistration(Client &client) {
+	if (!client.isRegistered())
+		return;
+	if (client.getRegistrationCompleted())
+		return;
+	client.setRegistrationCompleted(true);
+	sendToClient(client.getFd(), Replies::welcome(client));
 }
 
 bool Server::disconnectClient(int fd, size_t pollfds_idx) {

@@ -6,13 +6,14 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/15 19:39:24 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/16 19:56:22 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "Client.hpp"
 #include "IRC.hpp"
+#include <cstdlib>
 
 /***************
  * Constructor *
@@ -281,54 +282,138 @@ void	Channel::handleInvite(Client& inviter, Client& target) {
 	}
 }
 
+/***********************************************
+ * Checks if the invitator is an Operator      *
+ * 	Then checks the action add(+) or remove(-) *
+ **********************************************/
+void	Channel::handleOperatorinator(Client& inviter, Client& target, char action) {
+	if (isOperator(inviter)) {
+		if (action == '+') {
+			addOperator(target);
+		}
+		if (action == '-') {
+			removeOperator(target);
+		}
+	}
+}
+
+	/*****************
+	 * CHANNEL MODES *
+	 ****************/
+
+/**
+ * Changes Topic to a new one.
+ * If restricted only Operators can change it. *
+ */
+void	Channel::setTopic(std::string topic) {
+	_topic = topic;
+}
+
+/**
+ * Changes inviteOnly mode if client is operator
+ */
+void	Channel::setInvitedOnly(Client& client, bool inviteOnly) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	_inviteOnly = inviteOnly;
+}
+
+/**
+ * Changes topicRestricted mode if client is operator
+ */
+void	Channel::setTopicRestricted(Client& client, bool topicRestricted) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	_topicRestricted = topicRestricted;
+}
+
+/**
+ * Changes password if client is operator
+ */
+void	Channel::setKey(Client& client, const Command &cmd) {
+	if (!isOperator(client)){
+		// Not operator -> hexChat
+		return;
+	}
+	// Check if adds or removes key
+	if (cmd.params[1][0] == '+') {
+		_key = cmd.params[2];
+		LOG_DEBUG("PASWORD ADDED: " << cmd.params[2]);
+	} else if (cmd.params[1][0] == '-') {
+		if (cmd.params[2] != _key) {
+			// Error: Need the actual password to remove it. 
+			LOG_DEBUG("PASWORD NOT REMOVED: Incorrect pasword: " << cmd.params[2]);
+			return;
+		} else {
+			_key = "";
+			LOG_DEBUG("PASWORD REMOVED: " << _key);
+		}
+	} else
+		// Error: Bad mode key input
+		LOG_DEBUG("PASWORD ERROR: " << cmd.params[2]);
+}
+
+/**
+ * Changes userLimit if client is operator
+ */
+void	Channel::setUserLimit(Client& client, const Command &cmd) {
+	if (!isOperator(client)) {
+		// ERR_CHANOPRIVSNEEDED (482) — Person B sends numeric
+		return;
+	}
+	if (cmd.params[1][0] == '+') {
+		if (cmd.params.size() < 3) {
+			LOG_DEBUG("LIMIT ERROR: need a value");
+			return;
+		}
+		int limit = atoi(cmd.params[2].c_str());
+		if (limit <= 0) {
+			LOG_DEBUG("LIMIT ERROR: invalid value");
+			return;
+		}
+		_userLimit = static_cast<size_t>(limit);
+		LOG_DEBUG("USERLIMIT ADDED: " << _userLimit);
+	} else if (cmd.params[1][0] == '-') {
+		_userLimit = 0;
+		LOG_DEBUG("USERLIMIT REMOVED");
+	} else {
+		LOG_DEBUG("LIMIT ERROR: bad mode flag");
+	}
+}
+
 	/*********************
 	 * SETTERS & GETTERS *
 	 ********************/
 
-	// SETTERS
+// SETTERS
 
-	void	Channel::setName(std::string name) {
-		_name = name;
-	}
+void	Channel::setName(std::string name) {
+	_name = name;
+}
 
-	void	Channel::setTopic(std::string topic) {
-		_topic = topic;
-	}
 
-	void	Channel::setKey(const std::string key) {
-		_key = key;
-	}
+// GETTERS
 
-	void	Channel::setInvitedOnly(bool inviteOnly) {
-		_inviteOnly = inviteOnly;
-	}
+std::string&	Channel::getTopic() {
+	return _topic;
+}
 
-	void	Channel::setTopicRestricted(bool topicRestricted) {
-		_topicRestricted = topicRestricted;
-	}
+std::string&	Channel::getKey() {
+	return _key;
+}
 
-	void	Channel::setUserLimit(size_t userLimit) {
-		_userLimit = userLimit;
-	}
+bool			Channel::getInviteOnly() {
+	return _inviteOnly;
+}
 
-	// GETTERS
+bool			Channel::getTopicRestricted() {
+	return _topicRestricted;
+}
 
-	std::string&	Channel::getTopic() {
-		return _topic;
-	}
-
-	std::string&	Channel::getKey() {
-		return _key;
-	}
-
-	bool			Channel::getInviteOnly() {
-		return _inviteOnly;
-	}
-
-	bool			Channel::getTopicRestricted() {
-		return _topicRestricted;
-	}
-
-	size_t			Channel::getUserLimit() {
-		return _userLimit;
-	}
+size_t			Channel::getUserLimit() {
+	return _userLimit;
+}
