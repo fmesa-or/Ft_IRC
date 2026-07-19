@@ -58,7 +58,7 @@ namespace
 		Channel*	channel = server.findChannel(target);
 		if (!channel) {
 					server.sendToClient(client.getFd(),
-				":ft_irc 315 " + client.getNickname() + " " + target + " :End of /WHO list.\r\n");
+						":ft_irc 403 " + client.getNickname() + " " + target + " :No such channel\r\n");
 			return NULL;
 			}
 		return channel;
@@ -201,11 +201,11 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 			channel->handleOperatorinator(server, client, cmd);
 			break;
 		}
+		default:
+			server.sendToClient(client.getFd(),
+				":ft_irc 472 " + client.getNickname() + " " + cmd.params[1] +
+				" :is unknown mode char to me\r\n");
 	}
-	// If no mod founded returns an error (mod is not implemented)
-	server.sendToClient(client.getFd(),
-		":ft_irc 472 " + client.getNickname() + " " + cmd.params[1] +
-		" :is unknown mode char to me\r\n");
 }
 
  /**************************************************************************
@@ -366,15 +366,87 @@ void CommandDispatcher::handleKick(Server &server, Client &client, const Command
 	channel->handleKick(client, *target);
 }
 
+/**
+ * Invites Client to channel
+ */
+void CommandDispatcher::handleInvite(Server &server, Client &client, const Command &cmd) {
+	// Check params
+	if (cmd.params.size() < 2) {
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "KICK"));
+		return;
+	}
+
+	const std::string& targetNick = cmd.params[0];
+	const std::string& channelName = cmd.params[1];
+	
+	// Check if channel exist
+	Channel*	channel;
+	if (!(channel = channelExist(channelName, server, client)))
+		return;
+
+	// Checks if memeber
+	if (!channel->hasMember(client)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 442 " + client.getNickname() + " " + channelName +
+			" :You're not on that channel\r\n");
+		return;
+	}
+
+	// Checks if inviteOnly is active && If is NOT an operator
+	if (channel->getInviteOnly() && !channel->isOperator(client)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + channelName +
+			" :Invite mode is active and you're not channel operator\r\n");
+		return;
+	}
+
+	// Find target in server
+	Client* target = server.findClientByNick(targetNick);
+	if (!target) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 401 " + client.getNickname() + " " + targetNick +
+			" :No such nick\r\n");
+		return;
+	}
+
+
+	// Already a member
+	if (channel->hasMember(*target)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 443 " + client.getNickname() + " " + targetNick +
+			" " + channelName + " :is already on channel\r\n");
+		return;
+	} 
+	// Already Invited
+	if (channel->hasInvited(*target)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 443 " + client.getNickname() + " " + targetNick +
+			" " + channelName + " :is already invited\r\n");
+		return;
+	}
+
+	channel->handleInvite(client, *target);
+
+	// RPL_INVITING — Confirm to the invited
+	server.sendToClient(client.getFd(),
+		":ft_irc 341 " + client.getNickname() + " " + targetNick +
+		" " + channelName + "\r\n");
+
+	// Notify to the invited
+	server.sendToClient(target->getFd(),
+		":" + client.getNickname() + "!" + client.getUsername() +
+		"@localhost INVITE " + targetNick + " :" + channelName + "\r\n");
+}
+
 
 /*
 void CommandDispatcher::handlePart(Server &, Client &, const Command &)
 {
-    TODO();
+	TODO();
 }
 
 void CommandDispatcher::handleQuit(Server &, Client &, const Command &)
 {
-    TODO();
+	TODO();
 }
 */

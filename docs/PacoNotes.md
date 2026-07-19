@@ -128,3 +128,4 @@ Finish topic command implementation					✅
 
 # 2026/07/19
 Check Kick implementation with hexchat
+Check Invite implementation /invite nickname #channel

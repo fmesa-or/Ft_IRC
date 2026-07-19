@@ -19,11 +19,12 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["MODE"] = &CommandDispatcher::handleMode;
 	_handlers["TOPIC"] = &CommandDispatcher::handleTopic;
 	_handlers["KICK"] = &CommandDispatcher::handleKick;
+	_handlers["INVITE"] = &CommandDispatcher::handleInvite;
+
 
 	/*
     _handlers["PART"] = &CommandDispatcher::handlePart;
     _handlers["QUIT"] = &CommandDispatcher::handleQuit;
-	// INVITE Nickname #channel (+i only operators / -i anyone can)
     
     // Messaging
     _handlers["PRIVMSG"] = &CommandDispatcher::handlePrivmsg;
