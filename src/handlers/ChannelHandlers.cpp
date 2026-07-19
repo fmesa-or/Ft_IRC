@@ -50,6 +50,19 @@ namespace
 		}
 		return names.str();
 	}
+
+	/**
+	 * Checks if channel exist
+	 */
+	Channel*	channelExist(const std::string &target, Server &server, Client &client) {
+		Channel*	channel = server.findChannel(target);
+		if (!channel) {
+					server.sendToClient(client.getFd(),
+				":ft_irc 315 " + client.getNickname() + " " + target + " :End of /WHO list.\r\n");
+			return NULL;
+			}
+		return channel;
+	}
 }
 
 /**
@@ -141,11 +154,10 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 	}
 
 	// Check if channel exist
-	Channel*	channel = server.findChannel(cmd.params[0]);
-	if (!channel) {
-		// Comunicate with client (hexChat)
-		return ;
-	}
+	Channel*	channel;
+	if (!(channel = channelExist(cmd.params[0], server, client)))
+		return;
+
 	// If there is only 1 param (channel) -> Checks all modes
 	if (cmd.params.size() == 1) {
 		std::string modeStr = "+";
@@ -212,15 +224,12 @@ void	CommandDispatcher::handleWho(Server &server, Client &client, const Command 
 		return;
 	}
 
-	const std::string& target = cmd.params[0];
-	Channel* channel = server.findChannel(target);
-
-	if (!channel) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 315 " + client.getNickname() + " " + target + " :End of /WHO list.\r\n");
+	// Check if channel exist
+	Channel*	channel;
+	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
-	}
 
+	const std::string	target = cmd.params[0];
 	const std::set<Client*>& members = channel->getMembers();
 	for (std::set<Client*>::const_iterator it = members.begin(); it != members.end(); ++it) {
 		std::string prefix = channel->isOperator(**it) ? "@" : "";
@@ -248,17 +257,13 @@ void	CommandDispatcher::handleTopic(Server &server, Client &client, const Comman
 		return;
 	}
 
-	// Checks if channel exist
-	const std::string& target = cmd.params[0];
-	Channel* channel = server.findChannel(target);
-
-	 if (!channel) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 403 " + client.getNickname() + " " + target + " :No such channel\r\n");
+	// Check if channel exist
+	Channel*	channel;
+	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
-	}
 
 	// Checks if we recieve a topic and can be overwrited by the client
+	const std::string	target = cmd.params[0];
 	if (cmd.params.size() > 1) {
 		if (channel->getTopicRestricted() && !channel->isOperator(client)) {
 			server.sendToClient(client.getFd(),
@@ -305,6 +310,60 @@ void	CommandDispatcher::handleTopic(Server &server, Client &client, const Comman
 			" :" + channel->getTopic() + "\r\n");
 	}
 
+}
+
+/**
+ * Kicks a client from a channel
+ */
+void CommandDispatcher::handleKick(Server &server, Client &client, const Command &cmd)
+{
+	// Check params
+	if (cmd.params.size() < 2) {
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "KICK"));
+		return;
+	}
+
+	// Check if channel exist
+	Channel*	channel;
+	if (!(channel = channelExist(cmd.params[0], server, client)))
+		return;
+
+	// Check operator credentials
+	if (!channel->isOperator(client)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + channel->getName() +
+			" :You're not channel operator\r\n");
+		return;
+	}
+
+	// Find target by nickname
+	Client* target = server.findClientByNick(cmd.params[1]);
+	if (!target || !channel->hasMember(*target)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 441 " + client.getNickname() + " " + cmd.params[1] +
+			" " + channel->getName() + " :They aren't on that channel\r\n");
+		return;
+	}
+
+	// Cannot kick yourself if last member
+	if (target == &client && channel->getMembers().size() == 1) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 482 " + client.getNickname() + " " + channel->getName() +
+			" :You cannot kick yourself as the last member\r\n");
+		return;
+	}
+
+	// If there isn't any reason, use operator nick.
+	const std::string reason = (cmd.params.size() > 2) ? cmd.params[2] : client.getNickname();
+
+	// Broadcast Kick to everyone in channel
+	server.sendToChannel(*channel,
+		":" + client.getNickname() + "!" + client.getUsername() +
+		"@localhost KICK " + channel->getName() + " " + target->getNickname() +
+		" :" + reason + "\r\n");
+
+	// Internal server kick
+	channel->handleKick(client, *target);
 }
 
 

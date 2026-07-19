@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/17 15:21:36 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/19 11:53:04 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,6 @@ void	Channel::removeMember(Client& client) {
 	}
 	
 	removeFromContainer(client, _members);
-
-	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
 
 /*****************************************************************************

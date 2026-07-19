@@ -123,5 +123,8 @@ Notes:
 
 # 2026/07/17
 Finish setKey on Channel.cpp						✅
-Finish and Fix HandleMode on channelHandlers.cpp	
+Finish and Fix HandleMode on channelHandlers.cpp	✅
 Finish topic command implementation					✅
+
+# 2026/07/19
+Check Kick implementation with hexchat

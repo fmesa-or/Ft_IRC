@@ -18,11 +18,11 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["JOIN"] = &CommandDispatcher::handleJoin;
 	_handlers["MODE"] = &CommandDispatcher::handleMode;
 	_handlers["TOPIC"] = &CommandDispatcher::handleTopic;
+	_handlers["KICK"] = &CommandDispatcher::handleKick;
 
 	/*
     _handlers["PART"] = &CommandDispatcher::handlePart;
     _handlers["QUIT"] = &CommandDispatcher::handleQuit;
-	// KICK
 	// INVITE Nickname #channel (+i only operators / -i anyone can)
     
     // Messaging
