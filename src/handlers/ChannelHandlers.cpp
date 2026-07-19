@@ -483,6 +483,27 @@ void CommandDispatcher::handlePart(Server &server, Client &client, const Command
 		server.removeChannel(cmd.params[0]);
 }
 
+/**
+ * 
+ */
+void CommandDispatcher::handleQuit(Server &server, Client &client, const Command &cmd)
+{
+	const std::string reason = cmd.params.empty() ? "Client quit" : cmd.params[0];
+
+	const std::string quitMsg = ":" + client.getNickname() + "!" + client.getUsername()
+		+ "@localhost QUIT :" + reason + "\r\n";
+
+	// Notify every channel before parting
+	server.removeClientFromAllChannels(client, quitMsg);
+
+	// Confirsm to Client
+	server.sendToClient(client.getFd(),
+		":ft_irc ERROR :Closing Link: " + client.getNickname() +
+		" (" + reason + ")\r\n");
+
+	// Disconnects from server
+	server.disconnectClientByFd(client.getFd());
+}
 
 
 /*

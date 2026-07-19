@@ -21,10 +21,10 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["KICK"] = &CommandDispatcher::handleKick;
 	_handlers["INVITE"] = &CommandDispatcher::handleInvite;
 	_handlers["PART"] = &CommandDispatcher::handlePart;
+	_handlers["QUIT"] = &CommandDispatcher::handleQuit;
 
 
 	/*
-    _handlers["QUIT"] = &CommandDispatcher::handleQuit;
     
     // Messaging
     _handlers["PRIVMSG"] = &CommandDispatcher::handlePrivmsg;

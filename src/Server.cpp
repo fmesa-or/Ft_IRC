@@ -335,6 +335,39 @@ void Server::removeChannel(const std::string& name) {
 	LOG_DEBUG("Channel " << name << " removed");
 }
 
+/**********************************************
+ * Removes a single Client from every channel *
+ *********************************************/
+void Server::removeClientFromAllChannels(Client& client, const std::string& quitMsg) {
+	std::vector<std::string> emptyChannels;
+
+	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel& channel = it->second;
+		if (channel.hasMember(client)) {
+			sendToChannel(channel, quitMsg);
+			channel.handlePart(client);
+			// Stores all empty channels
+			if (channel.getMembers().empty())
+				emptyChannels.push_back(it->first);
+		}
+	}
+	// Remove empty channels
+	for (size_t i = 0; i < emptyChannels.size(); i++)
+		removeChannel(emptyChannels[i]);
+}
+
+/**********************************
+ * Disconnects Client from Server *
+ *********************************/
+void Server::disconnectClientByFd(int fd) {
+	for (size_t i = 0; i < _pollfds.size(); i++) {
+		if (_pollfds[i].fd == fd) {
+			disconnectClient(fd, i);
+			return;
+		}
+	}
+}
+
 void Server::flushClientMessages(Client& client) {
 	TODO();
 	(void)client;
