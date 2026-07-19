@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/19 11:53:04 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/19 16:22:05 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,7 +260,6 @@ void	Channel::handleJoin(Client& client) {
  ************************************************/
 void	Channel::handlePart(Client& client) {
 	removeMember(client);
-	// A rol: must implement the channel destruction if no more members left
 }
 
 /************************************************************************************

@@ -52,7 +52,7 @@ void	Server::sendToChannel(const Channel& channel, const std::string& message) {
 
  /******************************************************************************
  * Accepts and registers all pending client connections on @param listening_fd *
- *                                                                             *
+ *.                                                                            *
  * Loops until no more connections are pending (EAGAIN / EWOULDBLOCK).         *
  *                                                                             *
  * For each new connection:                                                    *
@@ -321,6 +321,18 @@ Channel*	Server::addChannel(const std::string& name) {
 		_channels.insert(std::make_pair(name, Channel(name)));
 
 		return &inserted.first->second;
+}
+
+/**
+ * Removes a channel from map container _channels *
+ */
+void Server::removeChannel(const std::string& name) {
+	if (_channels.find(name) == _channels.end()) {
+		LOG_DEBUG("removeChannel: channel " << name << " not found");
+		return;
+	}
+	_channels.erase(name);
+	LOG_DEBUG("Channel " << name << " removed");
 }
 
 void Server::flushClientMessages(Client& client) {

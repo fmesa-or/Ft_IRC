@@ -438,6 +438,52 @@ void CommandDispatcher::handleInvite(Server &server, Client &client, const Comma
 		"@localhost INVITE " + targetNick + " :" + channelName + "\r\n");
 }
 
+/**
+ * Makes client leave a channel.
+ * If no one is left removes the channel
+ *
+ * /part <nickname> <message>
+ */
+void CommandDispatcher::handlePart(Server &server, Client &client, const Command &cmd)
+{
+	// Check params
+	if (cmd.params.empty()) {
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "PART"));
+		return;
+	}
+
+	// Check if channel exists
+	Channel* channel;
+	if (!(channel = channelExist(cmd.params[0], server, client)))
+		return;
+
+	// Check if client is member
+	if (!channel->hasMember(client)) {
+		server.sendToClient(client.getFd(),
+			":ft_irc 442 " + client.getNickname() + " " + cmd.params[0] +
+			" :You're not on that channel\r\n");
+		return;
+	}
+
+	// Optional reason
+	const std::string reason = (cmd.params.size() > 1) ? cmd.params[1] : "";
+
+	// Broadcast PART to everyone before leaving
+	std::string partMsg = ":" + client.getNickname() + "!" + client.getUsername()
+		+ "@localhost PART " + channel->getName();
+	if (!reason.empty())
+		partMsg += " :" + reason;
+	partMsg += "\r\n";
+	server.sendToChannel(*channel, partMsg);
+
+	channel->handlePart(client);
+
+	// Remove channel if empty
+	if (channel->getMembers().empty())
+		server.removeChannel(cmd.params[0]);
+}
+
+
 
 /*
 void CommandDispatcher::handlePart(Server &, Client &, const Command &)

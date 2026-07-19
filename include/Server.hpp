@@ -29,6 +29,7 @@ public:
 
 	Channel*	findChannel(const std::string& name);
 	Channel*	addChannel(const std::string& name);
+	void		removeChannel(const std::string& name);
 
 	/* Outgoing communication */
 
