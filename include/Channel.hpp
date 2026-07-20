@@ -66,9 +66,9 @@ public:
 	const	std::set<Client*>&	getInvited() const;
 
 	/* Channel Support */
-	bool	canJoin(const Client& client, const std::string& key) const;
-	void	handleJoin(Client& client, const std::string& key);  // El primer usuario que crea el canal debe ser operador.
-	void	handleJoin(Client& client); // Overload
+	bool	canJoin(Server& server, const Client& client, const std::string& key) const;
+	bool	handleJoin(Server& server, Client& client, const std::string& key);  // El primer usuario que crea el canal debe ser operador.
+	bool	handleJoin(Server& server, Client& client); // Overload
 	void	handlePart(Client& client);
 	void	handleKick(Client& kicker, Client& target);
 	void	handleInvite(Client& inviter, Client& invited);

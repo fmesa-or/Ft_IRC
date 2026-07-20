@@ -133,5 +133,11 @@ Check Part
 Check Quit
 
 # 2026/07/20
-Add rejected message for join fail in invited mode
-When last operator PARTS kicks everyone, but not removes channel, so if client wants to join channel it can, and channel has 0ops and 1 user
+When last operator PARTS kicks everyone, but not removes channel, so if client wants to join channel it can, and channel has 0ops and 1 user			✅
+QUIT look for channels with 1 member and 0 ops	✅
+QUIT look if it's needed to close channel windows, or app window 	✅
+Add rejected message for join fail in invited mode					✅
+when given /pass from client (not at the connection) sends Unknown command
+LIMIT Send Error: message to client when trying to acces a channel with limit already full	✅
+
+FIX PASS USER NICK				✅ (No need to fix, works as intended)

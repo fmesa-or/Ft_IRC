@@ -30,7 +30,7 @@ public:
 	Channel*	findChannel(const std::string& name);
 	Channel*	addChannel(const std::string& name);
 	void		removeChannel(const std::string& name);
-	void		removeClientFromAllChannels(Client& client, const std::string& quitMsg);
+	void		removeClientFromAllChannels(Server& server, Client& client, const std::string& quitMsg);
 	void		disconnectClientByFd(int fd);
 
 

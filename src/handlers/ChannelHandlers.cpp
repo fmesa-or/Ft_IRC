@@ -89,13 +89,8 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 	Channel* channel = server.addChannel(cmd.params[0]);
 	const std::string key = (cmd.params.size() > 1) ? cmd.params[1] : "";
 
-	// Comprobar que el cliente se puede unir y lo une dentro del objeto canal
-	// Revisar, porque creo que es redundante!!!!
-	// Añadir mensaje de rechazo!
-	if (!channel->canJoin(client, key))
+	if (!channel->handleJoin(server, client, key))
 		return;
-
-	channel->handleJoin(client, key);
 
 	const std::string joinMessage = ":" + client.getNickname() + "!" + client.getUsername()
 		+ "@localhost JOIN " + channel->getName() + "\r\n";
@@ -347,10 +342,10 @@ void CommandDispatcher::handleKick(Server &server, Client &client, const Command
 	}
 
 	// Cannot kick yourself if last member
-	if (target == &client && channel->getMembers().size() == 1) {
+	if (target == &client) {
 		server.sendToClient(client.getFd(),
 			":ft_irc 482 " + client.getNickname() + " " + channel->getName() +
-			" :You cannot kick yourself as the last member\r\n");
+			" :You cannot kick yourself\r\n");
 		return;
 	}
 
@@ -502,7 +497,7 @@ void CommandDispatcher::handleQuit(Server &server, Client &client, const Command
 		+ "@localhost QUIT :" + reason + "\r\n";
 
 	// Notify every channel before parting
-	server.removeClientFromAllChannels(client, quitMsg);
+	server.removeClientFromAllChannels(server, client, quitMsg);
 
 	// Confirsm to Client
 	server.sendToClient(client.getFd(),

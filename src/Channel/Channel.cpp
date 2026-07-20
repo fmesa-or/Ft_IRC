@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/20 13:04:55 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/20 14:54:22 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,29 +185,34 @@ const std::set<Client*>&	Channel::getInvited() const {
 /************************************************
  * Checks if @param client can join the channel *
  ***********************************************/
- bool	Channel::canJoin(const Client& client, const std::string& key) const {
-	// Revisar que client está registrado
-//	if (!client.isRegistered()) {
-//		return false; // Is not registred
-//	}
-	// Revisar que el cliente no está ya dentro de la lista de miembros
+bool Channel::canJoin(Server& server, const Client& client, const std::string& key) const {
+	// Already a member
 	if (hasMember(client)) {
-		return false; // Already in channel
+		server.sendToClient(client.getFd(),
+			":ft_irc 443 " + client.getNickname() + " " + getName() +
+			" :is already on channel\r\n");
+		return false;
 	}
-	// Revisar canal lleno
+	// Full channel
 	if (_userLimit > 0 && _members.size() >= _userLimit) {
-		std::cout << "User regected: Channel reached limit." << std::endl; //debug
-		return false; // Channel full
+		server.sendToClient(client.getFd(),
+			":ft_irc 471 " + client.getNickname() + " " + getName() +
+			" :Cannot join channel (+l)\r\n");
+		return false;
 	}
-	// Revisar invitación
+	// Invite only
 	if (_inviteOnly && !hasInvited(client)) {
-		std::cout << "User regected: Must be invited" << std::endl; //debug
-		return false; // Must be invited
+		server.sendToClient(client.getFd(),
+			":ft_irc 473 " + client.getNickname() + " " + getName() +
+			" :Cannot join channel (+i)\r\n");
+		return false;
 	}
-	// Revisar contraseña
+	// Wrong password
 	if (!_key.empty() && key != _key) {
-		std::cout << "User regected: Wrong password" << std::endl; //debug
-		return false; // Wrong password
+		server.sendToClient(client.getFd(),
+			":ft_irc 475 " + client.getNickname() + " " + getName() +
+			" :Cannot join channel (+k)\r\n");
+		return false;
 	}
 	return true;
 }
@@ -222,9 +227,9 @@ const std::set<Client*>&	Channel::getInvited() const {
  *	Checks if there is an invitation mode                        *
  *		and removes the user from the invitation list.           *
  ****************************************************************/
-void	Channel::handleJoin(Client& client, const std::string& key) {
-	if (!canJoin(client, key)) {
-		return; // B rol should send numeric error
+bool	Channel::handleJoin(Server& server, Client& client, const std::string& key) {
+	if (!canJoin(server, client, key)) {
+		return false;
 	}
 	bool isFirst = _members.empty();
 	addMember(client);
@@ -234,14 +239,15 @@ void	Channel::handleJoin(Client& client, const std::string& key) {
 	if (_inviteOnly) {
 		removeInvited(client); // Remove the invitation for this user
 	}
+	return true;
 }
 
 /*********************************
  * Overload when inserted no key *
  ********************************/
-void	Channel::handleJoin(Client& client) {
-	if (!canJoin(client, "")) {
-		return; // B rol should send numeric error
+bool	Channel::handleJoin(Server& server, Client& client) {
+	if (!canJoin(server, client, "")) {
+		return false;
 	}
 	bool isFirst = _members.empty();
 	addMember(client);
@@ -251,6 +257,7 @@ void	Channel::handleJoin(Client& client) {
 	if (_inviteOnly) {
 		removeInvited(client); // Remove the invitation for this user
 	}
+	return true;
 }
 
 /*************************************************

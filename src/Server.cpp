@@ -338,7 +338,7 @@ void Server::removeChannel(const std::string& name) {
 /**********************************************
  * Removes a single Client from every channel *
  *********************************************/
-void Server::removeClientFromAllChannels(Client& client, const std::string& quitMsg) {
+void Server::removeClientFromAllChannels(Server& server, Client& client, const std::string& quitMsg) {
 	std::vector<std::string> emptyChannels;
 
 	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
@@ -347,13 +347,22 @@ void Server::removeClientFromAllChannels(Client& client, const std::string& quit
 			sendToChannel(channel, quitMsg);
 			channel.handlePart(client);
 			// Stores all empty channels
-			if (channel.getMembers().empty())
+			if (channel.getMembers().empty()) {
 				emptyChannels.push_back(it->first);
+			} else if (channel.getOperators().empty()) {
+				Client* newOp = *channel.getMembers().begin();
+				channel.addOperator(*newOp);
+				// Notificar al canal del nuevo operador
+				server.sendToChannel(channel,
+					":ft_irc MODE " + channel.getName() +
+					" +o " + newOp->getNickname() + "\r\n");
+			}
 		}
 	}
 	// Remove empty channels
 	for (size_t i = 0; i < emptyChannels.size(); i++)
 		removeChannel(emptyChannels[i]);
+
 }
 
 /**********************************
