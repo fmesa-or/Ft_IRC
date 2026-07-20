@@ -10,6 +10,7 @@
 /* ************************************************************************** */
 
 void CommandDispatcher::handlePass(Server &server, Client &client, const Command &cmd) {
+	LOG_DEBUG("HandlePass invoked");
 	if (client.isRegistered()) {
 		server.sendToClient(client.getFd(), Replies::alreadyRegistered(client));
 		return;

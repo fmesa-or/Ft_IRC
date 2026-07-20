@@ -22,7 +22,7 @@ void CommandDispatcher::dispatch(Server &server, Client &client, const Command &
 		return;
 	}
 
-	if (!client.isRegistered() && cmd.name != "PASS" && cmd.name != "NICK" && cmd.name != "USER" && cmd.name != "CAP") {
+	if (!client.isRegistered() && cmd.name != "PASS" && cmd.name != "NICK" && cmd.name != "USER" && cmd.name != "CAP" && cmd.name != "QUIT") {
 		server.sendToClient(client.getFd(), Replies::notRegistered(client));
 		return;
 	}
