@@ -127,7 +127,11 @@ Finish and Fix HandleMode on channelHandlers.cpp	✅
 Finish topic command implementation					✅
 
 # 2026/07/19
-Check Kick implementation with hexchat
-Check Invite implementation /invite nickname #channel
+Check Kick implementation with hexchat					✅
+Check Invite implementation /invite nickname #channel	✅
 Check Part
 Check Quit
+
+# 2026/07/20
+Add rejected message for join fail in invited mode
+When last operator PARTS kicks everyone, but not removes channel, so if client wants to join channel it can, and channel has 0ops and 1 user

@@ -198,6 +198,7 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 			break;
 		}
 		case 'o': {
+			LOG_DEBUG("CHECK +o");
 			channel->handleOperatorinator(server, client, cmd);
 			break;
 		}
@@ -478,9 +479,16 @@ void CommandDispatcher::handlePart(Server &server, Client &client, const Command
 
 	channel->handlePart(client);
 
-	// Remove channel if empty
-	if (channel->getMembers().empty())
+	if (channel->getMembers().empty()) {
 		server.removeChannel(cmd.params[0]);
+	} else if (channel->getOperators().empty()) {
+		Client* newOp = *channel->getMembers().begin();
+		channel->addOperator(*newOp);
+		// Notificar al canal del nuevo operador
+		server.sendToChannel(*channel,
+			":ft_irc MODE " + channel->getName() +
+			" +o " + newOp->getNickname() + "\r\n");
+	}
 }
 
 /**
