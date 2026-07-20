@@ -24,14 +24,12 @@ void CommandDispatcher::registerHandlers() {
 	_handlers["QUIT"] = &CommandDispatcher::handleQuit;
 
 
-	/*
-    
-    // Messaging
-    _handlers["PRIVMSG"] = &CommandDispatcher::handlePrivmsg;
-    _handlers["NOTICE"]  = &CommandDispatcher::handleNotice;
-    
-    _handlers["PONG"] = &CommandDispatcher::handlePong;
-	*/
+	// Messaging
+	_handlers["PRIVMSG"] = &CommandDispatcher::handlePrivMsg;
+	_handlers["NOTICE"]  = &CommandDispatcher::handleNotice;
+
+	// handlers["PONG"] = &CommandDispatcher::handlePong;
+
 	// Protocol
 	_handlers["PING"] = &CommandDispatcher::handlePing;
 	_handlers["WHO"] = &CommandDispatcher::handleWho;

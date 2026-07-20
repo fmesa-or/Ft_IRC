@@ -48,8 +48,8 @@ class CommandDispatcher {
 
 
     	// ---- MESSAGING ----
-    //	void handlePrivmsg(Server &server, Client &client, const Command &cmd);
-    //	void handleNotice(Server &server, Client &client, const Command &cmd);
+    	void handlePrivMsg(Server &server, Client &client, const Command &cmd);
+		void handleNotice(Server &server, Client &client, const Command &cmd);
 
     	// ---- PROTOCOL ----
 		//Envía un mensaje IRC de error al cliente que mandó un comando desconocido.
