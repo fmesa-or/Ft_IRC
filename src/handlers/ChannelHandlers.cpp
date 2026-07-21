@@ -474,12 +474,12 @@ void CommandDispatcher::handlePart(Server &server, Client &client, const Command
 
 	channel->handlePart(client);
 
+	// Choose new operator if channel turns orfan
 	if (channel->getMembers().empty()) {
 		server.removeChannel(cmd.params[0]);
 	} else if (channel->getOperators().empty()) {
 		Client* newOp = *channel->getMembers().begin();
 		channel->addOperator(*newOp);
-		// Notificar al canal del nuevo operador
 		server.sendToChannel(*channel,
 			":ft_irc MODE " + channel->getName() +
 			" +o " + newOp->getNickname() + "\r\n");

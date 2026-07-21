@@ -150,13 +150,14 @@ Check helpers.cpp. Can we name it with lower case?
 Remove comented includes in Server.cpp
 Check comments "FULL DISCONNECT LOGIC? from Server.cpp
 Check for bugs
-Check all files line by line
-Check subject
-Check correction sheet
-Add Replies to addOperator and remove Opperator		
-Check addOperator and removeOpperator				
+Check all files line by line											✅
+Check subject															✅ 
+Check correction sheet													✅ 
+Add Replies to addOperator and remove Opperator							
+Check addOperator and removeOpperator									
+Check fd leaks															
+
+COMPLETE README!!!! (at the end)
 
 
-
-
-PONG is not needed!! (Ole Ole)
+PONG is not needed!! (Ole Ole)✅ 

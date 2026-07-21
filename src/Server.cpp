@@ -28,7 +28,7 @@
 
 // Server::Server() {}
 
-Server::Server(int port, const std::string& password) : _port(port), _password(password) {}
+Server::Server(int port, const std::string& password) : _port(port), _password(password), _listen_fd(-1) {}
 
 const std::string& Server::getPassword() const {
 	return _password;
@@ -177,7 +177,10 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 
 	if (recv_buffer.size() > MAX_RECV_BUFFER_SIZE) {
 		disconnectClient(client.getFd(), pollfds_idx);
+		return; // ← añadir return, no seguir procesando
 	}
+
+	int fd = client.getFd(); // Saves fd before process
 
 	size_t line_end_position = 0;
 	while ((line_end_position = recv_buffer.find("\r\n")) != std::string::npos) {
@@ -190,6 +193,10 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 		Parser parser;
 		Command command = parser.parseLine(message);
 		_dispatcher.dispatch(*this, client, command);
+
+		// Si el cliente fue desconectado durante el dispatch, parar
+		if (_clients.find(fd) == _clients.end())
+			return;
 	}
 }
 
@@ -228,6 +235,12 @@ void Server::continuouslyPollSockets(int listening_fd) {
 					ERROR("Listening socket failed.");
 					return;
 				} else {
+					Client* client = findClientByFd(fd);
+					if (client) {
+						const std::string quitMsg = ":" + client->getNickname() + "!" 
+							+ client->getUsername() + "@localhost QUIT :Connection lost\r\n";
+						removeClientFromAllChannels(*this, *client, quitMsg);
+					}
 					disconnected = disconnectClient(fd, idx);
 				}
 			} else if ((revents & POLLIN) != 0) {
@@ -245,11 +258,23 @@ void Server::continuouslyPollSockets(int listening_fd) {
 						Client& client = _clients[fd];
 						processClientBuffer(client, buffer, bytes_received, idx);
 					} else if (bytes_received == 0) {
+						Client* client = findClientByFd(fd);
+						if (client) {
+							const std::string quitMsg = ":" + client->getNickname() + "!"
+								+ client->getUsername() + "@localhost QUIT :Connection closed\r\n";
+							removeClientFromAllChannels(*this, *client, quitMsg);
+						}
 						disconnected = disconnectClient(fd, idx);
 					} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
 						continue;
 					} else {
 						ERROR("recv error from client " << fd << ".");
+						Client* client = findClientByFd(fd);
+						if (client) {
+							const std::string quitMsg = ":" + client->getNickname() + "!"
+								+ client->getUsername() + "@localhost QUIT :Read error\r\n";
+							removeClientFromAllChannels(*this, *client, quitMsg);
+						}
 						disconnected = disconnectClient(fd, idx);
 					}
 				}
@@ -354,7 +379,7 @@ void Server::removeClientFromAllChannels(Server& server, Client& client, const s
 				channel.addOperator(*newOp);
 				server.sendToChannel(channel,
 					":ft_irc MODE " + channel.getName() +
-					" +o " + client.getNickname() + "\r\n");
+					" +o " + newOp->getNickname() + "\r\n"); // ← newOp, no client
 			}
 		}
 	}
