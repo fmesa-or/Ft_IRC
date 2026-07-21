@@ -21,18 +21,18 @@
  ******************************************************************************/
 namespace
 {
-	/**
-	 * Checks the name of the channel.
-	 * IT MUST START BY #
-	 */
+	/***********************************
+	 * Checks the name of the channel. *
+	 * IT MUST START BY #              *
+	 **********************************/
 	bool isValidChannelName(const std::string &name)
 	{
 		return !name.empty() && name[0] == '#';
 	}
 
-	/**
-	 * 
-	 */
+	/***************************************
+	 * Builds the name list send to Client *
+	 **************************************/
 	std::string buildNamesList(const Channel &channel)
 	{
 		std::ostringstream names;
@@ -51,9 +51,9 @@ namespace
 		return names.str();
 	}
 
-	/**
-	 * Checks if channel exist
-	 */
+	/***************************
+	 * Checks if channel exist *
+	 **************************/
 	Channel*	channelExist(const std::string &target, Server &server, Client &client) {
 		Channel*	channel = server.findChannel(target);
 		if (!channel) {
@@ -65,9 +65,9 @@ namespace
 	}
 }
 
-/**
- * 
- */
+/****************************
+ * Handles the JOIN command *
+ ***************************/
 void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command &cmd)
 {
 	if (cmd.params.empty())
@@ -96,7 +96,7 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 		+ "@localhost JOIN " + channel->getName() + "\r\n";
 	server.sendToChannel(*channel, joinMessage);
 
-	// Manda un mensaje informando del topic del canal
+	// Sends the topic of the channel
 	if (channel->getTopic().empty())
 	{
 		server.sendToClient(
@@ -112,13 +112,13 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 			" :" + channel->getTopic() + "\r\n");
 	}
 
-	// Añade cliente a la lista de nombres
+	// Add client to de name list
 	server.sendToClient(
 		client.getFd(),
 		":ft_irc 353 " + client.getNickname() + " = " + channel->getName() +
 		" :" + buildNamesList(*channel) + "\r\n");
 
-	// Fin de la lista clientes
+	// End the name list
 	server.sendToClient(
 		client.getFd(),
 		":ft_irc 366 " + client.getNickname() + " " + channel->getName() +
@@ -128,9 +128,9 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 
 }
 
-/**
- * Inputs: /mod <#channel> <mode> <argmnts>
- */
+/********************************************
+ * Inputs: /mod <#channel> <mode> <argmnts> *
+ *******************************************/
 void CommandDispatcher::handleMode(Server &server, Client &client, const Command &cmd)
 {
 	// Check if empty params
@@ -193,7 +193,6 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 			break;
 		}
 		case 'o': {
-			LOG_DEBUG("CHECK +o");
 			channel->handleOperatorinator(server, client, cmd);
 			break;
 		}
@@ -242,9 +241,10 @@ void	CommandDispatcher::handleWho(Server &server, Client &client, const Command 
 		":ft_irc 315 " + client.getNickname() + " " + target + " :End of /WHO list.\r\n");
 }
 
-/**
- * 
- */
+/*********************************************************
+ * Handles the TOPIC command.                            *
+ * It could be for asking topic, change it or delete it. *
+ ********************************************************/
 void	CommandDispatcher::handleTopic(Server &server, Client &client, const Command &cmd) {
 
 	// Check params
@@ -308,9 +308,9 @@ void	CommandDispatcher::handleTopic(Server &server, Client &client, const Comman
 
 }
 
-/**
- * Kicks a client from a channel
- */
+/*********************************
+ * Kicks a client from a channel *
+ ********************************/
 void CommandDispatcher::handleKick(Server &server, Client &client, const Command &cmd)
 {
 	// Check params
@@ -362,9 +362,9 @@ void CommandDispatcher::handleKick(Server &server, Client &client, const Command
 	channel->handleKick(client, *target);
 }
 
-/**
- * Invites Client to channel
- */
+/*****************************
+ * Invites Client to channel *
+ ****************************/
 void CommandDispatcher::handleInvite(Server &server, Client &client, const Command &cmd) {
 	// Check params
 	if (cmd.params.size() < 2) {
@@ -434,12 +434,12 @@ void CommandDispatcher::handleInvite(Server &server, Client &client, const Comma
 		"@localhost INVITE " + targetNick + " :" + channelName + "\r\n");
 }
 
-/**
- * Makes client leave a channel.
- * If no one is left removes the channel
- *
- * /part <nickname> <message>
- */
+/*****************************************
+ * Makes client leave a channel.         *
+ * If no one is left removes the channel *
+ *                                       *
+ * /part <nickname> <reason>             *
+ ****************************************/
 void CommandDispatcher::handlePart(Server &server, Client &client, const Command &cmd)
 {
 	// Check params
@@ -486,9 +486,10 @@ void CommandDispatcher::handlePart(Server &server, Client &client, const Command
 	}
 }
 
-/**
- * 
- */
+/****************************************************************************
+ * Handles QUIT command.                                                    *
+ * Broadcast message to every channel which has @param client and leaves it *
+ ***************************************************************************/
 void CommandDispatcher::handleQuit(Server &server, Client &client, const Command &cmd)
 {
 	const std::string reason = cmd.params.empty() ? "Client quit" : cmd.params[0];
@@ -507,16 +508,3 @@ void CommandDispatcher::handleQuit(Server &server, Client &client, const Command
 	// Disconnects from server
 	server.disconnectClientByFd(client.getFd());
 }
-
-
-/*
-void CommandDispatcher::handlePart(Server &, Client &, const Command &)
-{
-	TODO();
-}
-
-void CommandDispatcher::handleQuit(Server &, Client &, const Command &)
-{
-	TODO();
-}
-*/

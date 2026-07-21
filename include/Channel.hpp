@@ -54,8 +54,8 @@ public:
 
 	/* Operators */
 
-	void	addOperator(Client& client);
-	void	removeOperator(Client& client);
+	bool	addOperator(Client& client);
+	bool	removeOperator(Client& client);
 	bool	isOperator(const Client& client) const;
 	const std::set<Client*>&	getOperators() const;
 

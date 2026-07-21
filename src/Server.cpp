@@ -323,9 +323,9 @@ Channel*	Server::addChannel(const std::string& name) {
 		return &inserted.first->second;
 }
 
-/**
+/**************************************************
  * Removes a channel from map container _channels *
- */
+ *************************************************/
 void Server::removeChannel(const std::string& name) {
 	if (_channels.find(name) == _channels.end()) {
 		LOG_DEBUG("removeChannel: channel " << name << " not found");
@@ -352,10 +352,9 @@ void Server::removeClientFromAllChannels(Server& server, Client& client, const s
 			} else if (channel.getOperators().empty()) {
 				Client* newOp = *channel.getMembers().begin();
 				channel.addOperator(*newOp);
-				// Notificar al canal del nuevo operador
 				server.sendToChannel(channel,
 					":ft_irc MODE " + channel.getName() +
-					" +o " + newOp->getNickname() + "\r\n");
+					" +o " + client.getNickname() + "\r\n");
 			}
 		}
 	}
