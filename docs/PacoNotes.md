@@ -153,9 +153,9 @@ Check for bugs
 Check all files line by line											✅
 Check subject															✅ 
 Check correction sheet													✅ 
+Check fd leaks															✅
 Add Replies to addOperator and remove Opperator							
 Check addOperator and removeOpperator									
-Check fd leaks															
 
 COMPLETE README!!!! (at the end)
 
