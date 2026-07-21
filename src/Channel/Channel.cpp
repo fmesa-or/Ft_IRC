@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/20 14:54:22 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/21 12:23:14 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void	Channel::removeMember(Client& client) {
 	if (isOperator(client)) {
 		removeFromContainer(client, _operators);
 	}
-	
+
 	removeFromContainer(client, _members);
 }
 
@@ -87,16 +87,14 @@ const std::set<Client*>&	Channel::getMembers() const {
 /************************************************************************
  * Agregates a new @param client to the @param _operators set container *
  *	only if it is already in @param _members                            *
- * For std::pair we can use .first & .second.                           *
- *	first	-> Iterator pointing to the new element.                    *
- *	second	-> True if added, False if not.                             *
  ***********************************************************************/
-void	Channel::addOperator(Client& client) {
+bool	Channel::addOperator(Client& client) {
 	if (!hasMember(client)) {
-		// No puede ser añadido como operador si no existe previamente como miembro
-		return; // Puede que aquí añada un throw
+		LOG_DEBUG("Error: Couldn't add operator. Is not a member.");
+		return false;
 	}
 	addToContainer(client, _operators);
+	return true;
 }
 
 /*********************************************************************
@@ -104,28 +102,14 @@ void	Channel::addOperator(Client& client) {
  *	but not from member.                                             *
  * If @param client is the only one operator, it doesn't removes it. *
  ********************************************************************/
-void	Channel::removeOperator(Client& client) {
+bool	Channel::removeOperator(Client& client) {
 	if (_operators.size() <= 1) {
-		std::cout << "Error: Couldn't remove operator. Always must be one." << std::endl;
-		return;
+		LOG_DEBUG("Error: Couldn't remove operator. Always must be one.");
+		return false;
 	}
 	removeFromContainer(client, _operators);
+	return true;
 }
- /* V0.1
-void	Channel::removeOperator(Client& client) {
-	// Allways has to be at least one operator
-	if (_operators.size() > 1) {
-		removeFromContainer(client, _operators);
-	}
-	else if (_operators.size() == 1 && _members.size() == 1) {
-		removeFromContainer(client, _operators);
-		removeFromContainer(client, _members);
-	}
-	else {
-		// Mensaje: solo puede quedar uno (operador)
-	}
-}
-*/
 
 /***************************************************************************
  * Checks if a @param client is inside the @param _operators set container *
@@ -160,8 +144,6 @@ void	Channel::addInvited(Client& client) {
  ******************************************************************/
 void	Channel::removeInvited(Client& client) {
 	removeFromContainer(client, _invited);
-
-	// Comprobar si canal queda vacío y marcar para que sea eliminado por rol A
 }
 
 /*****************************************************************************
@@ -234,7 +216,10 @@ bool	Channel::handleJoin(Server& server, Client& client, const std::string& key)
 	bool isFirst = _members.empty();
 	addMember(client);
 	if (isFirst) {
-		addOperator(client); // This means the client is the creator of the channel
+		addOperator(client);
+		server.sendToChannel(*this,
+					":ft_irc MODE " + this->getName() +
+					" +o " + client.getNickname() + "\r\n");
 	}
 	if (_inviteOnly) {
 		removeInvited(client); // Remove the invitation for this user
@@ -252,7 +237,10 @@ bool	Channel::handleJoin(Server& server, Client& client) {
 	bool isFirst = _members.empty();
 	addMember(client);
 	if (isFirst) {
-		addOperator(client); // This means the client is the creator of the channel
+		addOperator(client);
+		server.sendToChannel(*this,
+					":ft_irc MODE " + this->getName() +
+					" +o " + client.getNickname() + "\r\n");
 	}
 	if (_inviteOnly) {
 		removeInvited(client); // Remove the invitation for this user
@@ -321,22 +309,36 @@ void Channel::handleOperatorinator(Server& server, Client& client, Command cmd) 
 	}
 
 	if (cmd.params[1][0] == '+') {
-		addOperator(*target);
+		if (!addOperator(*target)) {
+			server.sendToClient(client.getFd(),
+				":ft_irc 441 " + client.getNickname() + " " + target->getNickname() +
+				" " + getName() + " :They aren't on that channel\r\n");
+			return;
+		}
 		server.sendToChannel(*this,
 			":" + client.getNickname() + "!" + client.getUsername() +
 			"@localhost MODE " + getName() + " +o " + cmd.params[2] + "\r\n");
 	} else if (cmd.params[1][0] == '-') {
-		removeOperator(*target);
-		server.sendToChannel(*this,
-			":" + client.getNickname() + "!" + client.getUsername() +
-			"@localhost MODE " + getName() + " -o " + cmd.params[2] + "\r\n");
+		if (!isOperator(*target)) {
+			server.sendToClient(client.getFd(),
+				":ft_irc 441 " + client.getNickname() + " " + target->getNickname() +
+				" " + getName() + " :They aren't on that channel\r\n");
+		} else if (!removeOperator(*target)) {
+			server.sendToClient(client.getFd(),
+				":ft_irc 482 " + client.getNickname() + " " + getName() +
+				" :Cannot remove the last operator of the channel\r\n");
+		} else {
+			server.sendToChannel(*this,
+				":" + client.getNickname() + "!" + client.getUsername() +
+				"@localhost MODE " + getName() + " -o " + cmd.params[2] + "\r\n");
+		}
 	}
 }
 
-/**
- * Changes Topic to a new one.
+/***********************************************
+ * Changes Topic to a new one.                 *
  * If restricted only Operators can change it. *
- */
+ **********************************************/
 void	Channel::setTopic(std::string topic) {
 	_topic = topic;
 }
@@ -345,9 +347,9 @@ void	Channel::setTopic(std::string topic) {
 	 * CHANNEL MODES *
 	 ****************/
 
-/**
- * Changes inviteOnly mode if client is operator
- */
+/*************************************************
+ * Changes inviteOnly mode if client is operator *
+ ************************************************/
 void	Channel::setInvitedOnly(Server& server, Client& client, Command cmd) {
 	if (!isOperator(client)){
 		server.sendToClient(client.getFd(),
@@ -362,9 +364,9 @@ void	Channel::setInvitedOnly(Server& server, Client& client, Command cmd) {
 		cmd.params[1] + "\r\n");
 }
 
-/**
- * Changes topicRestricted mode if client is operator
- */
+/******************************************************
+ * Changes topicRestricted mode if client is operator *
+ *****************************************************/
 void	Channel::setTopicRestricted(Server& server, Client& client, Command cmd) {
 	if (!(isOperator(client))){
 		server.sendToClient(client.getFd(),
@@ -379,9 +381,9 @@ void	Channel::setTopicRestricted(Server& server, Client& client, Command cmd) {
 	cmd.params[1] + "\r\n");
 }
 
-/**
- * Changes password if client is operator
- */
+/******************************************
+ * Changes password if client is operator *
+ *****************************************/
 void	Channel::setKey(Server &server, Client &client, Command cmd) {
 	if (cmd.params.size() < 3) {
 		server.sendToClient(client.getFd(),
@@ -417,9 +419,9 @@ void	Channel::setKey(Server &server, Client &client, Command cmd) {
 	cmd.params[1] + " " + cmd.params[2] + "\r\n");
 }
 
-/**
- * Changes userLimit if client is operator
- */
+/*******************************************
+ * Changes userLimit if client is operator *
+ ******************************************/
 void	Channel::setUserLimit(Server &server, Client &client, Command cmd) {
 	if (!isOperator(client)) {
 		server.sendToClient(client.getFd(),

@@ -47,18 +47,10 @@ void CommandDispatcher::handleCap(Server &server, Client &client, const Command 
 	}
 }
 
-/**
- * 
- */
+/******************************************
+ * Checks if the connections stills alive *
+ *****************************************/
 void CommandDispatcher::handlePing(Server &server, Client &client, const Command &cmd) {
 	const std::string token = cmd.params.empty() ? "ft_irc" : cmd.params[0];
 	server.sendToClient(client.getFd(), ":ft_irc PONG ft_irc :" + token + "\r\n");
 }
-
-/*
-
-void CommandDispatcher::handlePong(...)
-{
-    ...
-}
-	*/
