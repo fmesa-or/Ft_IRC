@@ -45,7 +45,7 @@ void CommandDispatcher::handlePrivMsg(Server &server, Client &client, const Comm
 void CommandDispatcher::handleNotice(Server &server, Client &client, const Command &cmd)
 {
 	if (cmd.params.size() < 2) {
-		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "PRIVMSG"));
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "NOTICE"));
 		return ;
 	}
 
@@ -55,8 +55,10 @@ void CommandDispatcher::handleNotice(Server &server, Client &client, const Comma
 	if (target[0] == '#') {
 		Channel *broadcast = server.findChannel(target);
 		if (!broadcast)
+			LOG_DEBUG("NOTICE: Channel not found");
 			return ;
 		if (!broadcast->hasMember(client))
+			LOG_DEBUG("NOTICE: You are not in channel");
 			return ;
 		for (std::set<Client *>::const_iterator it =  broadcast->getMembers().begin(); it != broadcast->getMembers().end(); it++) {
 			Client *member = *it;

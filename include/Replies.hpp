@@ -55,6 +55,8 @@ public:
 
 	static std::string	closingLinkMsg(const Client &client, const std::string &reason);
 
+	static std::string	noticeWrongPassword(const std::string& nickname);
+
 
 	//Channel protocol msg
 	static std::string	noSuchChannel(const Client &client, const std::string &channel);
