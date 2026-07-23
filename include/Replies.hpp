@@ -53,7 +53,7 @@ public:
 
 	static std::string	quitMsg(const Client &client, const std::string &reason);
 
-	static std::string Replies::closingLinkMsg(const Client &client, const std::string &reason);
+	static std::string	closingLinkMsg(const Client &client, const std::string &reason);
 
 
 	//Channel protocol msg
