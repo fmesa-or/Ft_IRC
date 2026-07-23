@@ -62,29 +62,3 @@ void CommandDispatcher::handleUser(Server &server, Client &client, const Command
     client.setHasUsername(true);
 	server.completeClientRegistration(client);
 }
-
-/**
- * 
- */
-/*
-void CommandDispatcher::tryRegister(Server &server, Client &client) {
-	if (!client.hasPassword() || !client.hasNickname() || !client.hasUsername())
-		return;
-	server.sendToClient(client.getFd(), Replies::welcome(client));
-}
-*/
-
-/*void CommandDispatcher::tryRegister(Server &server, Client &client) {
-	if (client.isRegistered())
-		return;
-	if (!client.hasPassword())
-		return;
-	if (!client.hasNickname())
-		return;
-	if (!client.hasUsername())
-	    return;
-
-    client.setRegistered(true);
-
-    server.sendToClient(client, Replies::welcome(client));
-}*/

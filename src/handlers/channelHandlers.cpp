@@ -30,9 +30,8 @@ namespace
 		return !name.empty() && name[0] == '#';
 	}
 
-	/***************************************
-	 * Builds the name list send to Client *
-	 **************************************/
+	
+	// Builds the NAMES list sent to the client
 	std::string buildNamesList(const Channel &channel)
 	{
 		std::ostringstream names;
@@ -51,16 +50,15 @@ namespace
 		return names.str();
 	}
 
-	/***************************
-	 * Checks if channel exist *
-	 **************************/
+
+	 // Checks whether the channel exists
+	
 	Channel*	channelExist(const std::string &target, Server &server, Client &client) {
 		Channel*	channel = server.findChannel(target);
 		if (!channel) {
-					server.sendToClient(client.getFd(),
-						":ft_irc 403 " + client.getNickname() + " " + target + " :No such channel\r\n");
+			server.sendToClient(client.getFd(), Replies::noSuchChannel (client, target));
 			return NULL;
-			}
+		}
 		return channel;
 	}
 }
@@ -78,54 +76,31 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
 
 	if (!isValidChannelName(cmd.params[0]))
 	{
-		server.sendToClient(
-			client.getFd(),
-			":ft_irc 476 " + client.getNickname() + " " + cmd.params[0] +
-			" :Bad Channel Mask\r\n");
+		server.sendToClient(client.getFd(), Replies::badChannelMask(client, cmd.params[0]));
 		return;
 	}
 
-	// Creates a new channel and returns it, if does exits, just returns the channel
+	// Creates a new channel if it doesn't exist. Otherwise, returns the existing channel.
 	Channel* channel = server.addChannel(cmd.params[0]);
 	const std::string key = (cmd.params.size() > 1) ? cmd.params[1] : "";
 
 	if (!channel->handleJoin(server, client, key))
 		return;
 
-	const std::string joinMessage = ":" + client.getNickname() + "!" + client.getUsername()
-		+ "@localhost JOIN " + channel->getName() + "\r\n";
-	server.sendToChannel(*channel, joinMessage);
+	server.sendToChannel(*channel, Replies::joinMsg(client, channel->getName()));
 
 	// Sends the topic of the channel
 	if (channel->getTopic().empty())
-	{
-		server.sendToClient(
-			client.getFd(),
-			":ft_irc 331 " + client.getNickname() + " " + channel->getName() +
-			" :No topic is set\r\n");
-	}
+		server.sendToClient(client.getFd(), Replies::noTopicSet(client, channel->getName()));
+
 	else
-	{
-		server.sendToClient(
-			client.getFd(),
-			":ft_irc 332 " + client.getNickname() + " " + channel->getName() +
-			" :" + channel->getTopic() + "\r\n");
-	}
+		server.sendToClient(client.getFd(), Replies::topic(client, channel->getName(), channel->getTopic()));
 
-	// Add client to de name list
-	server.sendToClient(
-		client.getFd(),
-		":ft_irc 353 " + client.getNickname() + " = " + channel->getName() +
-		" :" + buildNamesList(*channel) + "\r\n");
+	// Sends the NAMES list to the client.
+	server.sendToClient(client.getFd(), Replies::nameReply(client, channel->getName(), buildNamesList(*channel)));
 
-	// End the name list
-	server.sendToClient(
-		client.getFd(),
-		":ft_irc 366 " + client.getNickname() + " " + channel->getName() +
-		" :End of /NAMES list.\r\n");
-
-
-
+	// Sends the end of the NAMES list reply
+	server.sendToClient(client.getFd(), Replies::endOfNames(client, channel->getName()));
 }
 
 /********************************************
@@ -133,27 +108,24 @@ void	CommandDispatcher::handleJoin(Server &server, Client &client, const Command
  *******************************************/
 void CommandDispatcher::handleMode(Server &server, Client &client, const Command &cmd)
 {
-	// Check if empty params
+	// Checks parameters
 	if (cmd.params.empty()) {
-		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "JOIN"));
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "MODE"));
 		return;
 	}
 
-	// Check if channel is valid
+	// Checks whether the channel is valid
 	if (!isValidChannelName(cmd.params[0])) {
-		server.sendToClient(
-			client.getFd(),
-			":ft_irc 476 " + client.getNickname() + " " + cmd.params[0] +
-			" :Bad Channel Mask\r\n");
+		server.sendToClient(client.getFd(), Replies::badChannelMask(client, cmd.params[0]));
 		return;
 	}
 
-	// Check if channel exist
+	// Checks whether the channel exists
 	Channel*	channel;
 	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
 
-	// If there is only 1 param (channel) -> Checks all modes
+	// // If only the channel is provided, checks all active modes
 	if (cmd.params.size() == 1) {
 		std::string modeStr = "+";
 		if (channel->getInviteOnly())     modeStr += "i";
@@ -161,9 +133,7 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 		if (!channel->getKey().empty())   modeStr += "k";
 		if (channel->getUserLimit() > 0)  modeStr += "l";
 
-		server.sendToClient(client.getFd(),
-			":ft_irc 324 " + client.getNickname() + " " + channel->getName() +
-			" " + modeStr + "\r\n");
+		server.sendToClient(client.getFd(), Replies::channelModeIs(client, channel->getName(), modeStr));
 		return;
 	}
 
@@ -173,8 +143,8 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 	if (cmd.params[1].size() < 2)
 		return;
 
-	// Sends to especific mod handler
-	char		mode = cmd.params[1][1]; // Ignoring the +/- simbol
+	// Sends the command to the specific mode handler
+	char		mode = cmd.params[1][1]; // Ignoring the +/- symbol
 
 
 	switch (mode) {
@@ -197,9 +167,7 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
 			break;
 		}
 		default:
-			server.sendToClient(client.getFd(),
-				":ft_irc 472 " + client.getNickname() + " " + cmd.params[1] +
-				" :is unknown mode char to me\r\n");
+			server.sendToClient(client.getFd(), Replies::unknownMode(client, cmd.params[1]));
 	}
 }
 
@@ -214,12 +182,11 @@ void CommandDispatcher::handleMode(Server &server, Client &client, const Command
  **************************************************************************/
 void	CommandDispatcher::handleWho(Server &server, Client &client, const Command &cmd) {
 	if (cmd.params.empty()) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 315 " + client.getNickname() + " * :End of /WHO list.\r\n");
+		server.sendToClient(client.getFd(), Replies::endOfWho(client, "*"));
 		return;
 	}
 
-	// Check if channel exist
+	// Checks whether the channel exists
 	Channel*	channel;
 	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
@@ -230,15 +197,10 @@ void	CommandDispatcher::handleWho(Server &server, Client &client, const Command 
 		std::string prefix = channel->isOperator(**it) ? "@" : "";
 		// 352: RPL_WHOREPLY
 		// :server 352 <requestor> <channel> <user> <host> <server> <nick> H[@] :<hopcount> <realname>
-		server.sendToClient(client.getFd(),
-			":ft_irc 352 " + client.getNickname() + " " + target +
-			" " + (*it)->getUsername() +
-			" localhost ft_irc " + (*it)->getNickname() +
-			" H" + prefix + " :0 " + (*it)->getNickname() + "\r\n");
+		server.sendToClient(client.getFd(),  Replies::whoReply(client, target, **it, prefix));
 	}
 
-	server.sendToClient(client.getFd(),
-		":ft_irc 315 " + client.getNickname() + " " + target + " :End of /WHO list.\r\n");
+	server.sendToClient(client.getFd(), Replies::endOfWho(client, target));
 }
 
 /*********************************************************
@@ -247,63 +209,50 @@ void	CommandDispatcher::handleWho(Server &server, Client &client, const Command 
  ********************************************************/
 void	CommandDispatcher::handleTopic(Server &server, Client &client, const Command &cmd) {
 
-	// Check params
+	// Checks parameters
 	if (cmd.params.empty()) {
 		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "TOPIC"));
 		return;
 	}
 
-	// Check if channel exist
+	// Checks whether the channel exists
 	Channel*	channel;
 	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
 
-	// Checks if we recieve a topic and can be overwrited by the client
+	// Checks whether a new topic was provided and can be overwritten by the client
 	const std::string	target = cmd.params[0];
 	if (cmd.params.size() > 1) {
 		if (channel->getTopicRestricted() && !channel->isOperator(client)) {
-			server.sendToClient(client.getFd(),
-				":ft_irc 482 " + client.getNickname() + " " + target +
-				" :You're not channel operator\r\n");
+			server.sendToClient(client.getFd(), Replies::notChannelOperator(client, target));
 			return;
 		}
-		// Agrupates all the params forming the topic
 		std::string newTopic = cmd.params[1];
-		for (size_t i = 2; i < cmd.params.size(); i++)
-			newTopic += " " + cmd.params[i];
 
-		if (newTopic == "remove") {
+		if (newTopic == "remove")
 			newTopic = "";
-		}
 
 		channel->setTopic(newTopic);
 
 		if (newTopic.empty()) {
-				// Broadcast to everyone that the topic has changed
-				server.sendToChannel(*channel,
-					":" + client.getNickname() + "!" + client.getUsername() +
-					"@localhost TOPIC " + target + " :\r\n");
+				// Broadcasts the topic change to all channel members
+				server.sendToChannel(*channel, Replies::removeTopicMsg(client, target));
 
-					// Confirms client with 331
-				server.sendToClient(client.getFd(),
-					":ft_irc 331 " + client.getNickname() + " " + target +
-					" :No topic is set\r\n");
-		} else {
-			server.sendToChannel(*channel,
-				":" + client.getNickname() + "!" + client.getUsername() +
-				"@localhost TOPIC " + target + " :" + newTopic + "\r\n");
+				// Sends RPL_NOTOPIC (331) to the client
+				server.sendToClient(client.getFd(), Replies::noTopicSet(client, target));
+		} 
+		else {
+			server.sendToChannel(*channel, Replies::topicMsg(client, target, newTopic));
 		}
 		return;
 	}
 
-	// Checks the actual topic
+	// Sends current topic
 	if (channel->getTopic().empty()) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 331 " + client.getNickname() + " " + target + " :No topic is set\r\n");
-	} else {
-		server.sendToClient(client.getFd(),
-			":ft_irc 332 " + client.getNickname() + " " + target +
-			" :" + channel->getTopic() + "\r\n");
+		server.sendToClient(client.getFd(), Replies::noTopicSet(client, target));
+	} 
+	else {
+		server.sendToClient(client.getFd(), Replies::topic(client, target, channel->getTopic()));
 	}
 
 }
@@ -313,31 +262,27 @@ void	CommandDispatcher::handleTopic(Server &server, Client &client, const Comman
  ********************************/
 void CommandDispatcher::handleKick(Server &server, Client &client, const Command &cmd)
 {
-	// Check params
+	// Checks parameters
 	if (cmd.params.size() < 2) {
 		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "KICK"));
 		return;
 	}
 
-	// Check if channel exist
+	// Checks whether the channel exists
 	Channel*	channel;
 	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
 
-	// Check operator credentials
+	// Checks operator credentials
 	if (!channel->isOperator(client)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 482 " + client.getNickname() + " " + channel->getName() +
-			" :You're not channel operator\r\n");
+		server.sendToClient(client.getFd(), Replies::notChannelOperator(client, cmd.params[0]));
 		return;
 	}
 
-	// Find target by nickname
+	// Finds target by nickname
 	Client* target = server.findClientByNick(cmd.params[1]);
 	if (!target || !channel->hasMember(*target)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 441 " + client.getNickname() + " " + cmd.params[1] +
-			" " + channel->getName() + " :They aren't on that channel\r\n");
+		server.sendToClient(client.getFd(), Replies::userNotInChannel(client, cmd.params[1], cmd.params[0]));
 		return;
 	}
 
@@ -353,10 +298,7 @@ void CommandDispatcher::handleKick(Server &server, Client &client, const Command
 	const std::string reason = (cmd.params.size() > 2) ? cmd.params[2] : client.getNickname();
 
 	// Broadcast Kick to everyone in channel
-	server.sendToChannel(*channel,
-		":" + client.getNickname() + "!" + client.getUsername() +
-		"@localhost KICK " + channel->getName() + " " + target->getNickname() +
-		" :" + reason + "\r\n");
+	server.sendToChannel(*channel, Replies::kickMsg(client, channel->getName(), target->getNickname(), reason));
 
 	// Internal server kick
 	channel->handleKick(client, *target);
@@ -366,72 +308,58 @@ void CommandDispatcher::handleKick(Server &server, Client &client, const Command
  * Invites Client to channel *
  ****************************/
 void CommandDispatcher::handleInvite(Server &server, Client &client, const Command &cmd) {
-	// Check params
+	// Checks parameters
 	if (cmd.params.size() < 2) {
-		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "KICK"));
+		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "INVITE"));
 		return;
 	}
 
 	const std::string& targetNick = cmd.params[0];
 	const std::string& channelName = cmd.params[1];
 	
-	// Check if channel exist
+	// Checks whether the channel exists
 	Channel*	channel;
 	if (!(channel = channelExist(channelName, server, client)))
 		return;
 
-	// Checks if memeber
+	// Checks whether the client is a member
 	if (!channel->hasMember(client)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 442 " + client.getNickname() + " " + channelName +
-			" :You're not on that channel\r\n");
+		server.sendToClient(client.getFd(), Replies::notOnChannel(client, channelName));
 		return;
 	}
 
 	// Checks if inviteOnly is active && If is NOT an operator
 	if (channel->getInviteOnly() && !channel->isOperator(client)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 482 " + client.getNickname() + " " + channelName +
-			" :Invite mode is active and you're not channel operator\r\n");
+		server.sendToClient(client.getFd(), Replies::notChannelOperator(client, channelName));
 		return;
 	}
 
-	// Find target in server
+	// Finds target in server
 	Client* target = server.findClientByNick(targetNick);
 	if (!target) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 401 " + client.getNickname() + " " + targetNick +
-			" :No such nick\r\n");
+		server.sendToClient(client.getFd(), Replies::noSuchNick(client, targetNick));
 		return;
 	}
 
 
 	// Already a member
 	if (channel->hasMember(*target)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 443 " + client.getNickname() + " " + targetNick +
-			" " + channelName + " :is already on channel\r\n");
+		server.sendToClient(client.getFd(), Replies::userOnChannel(client, targetNick, channelName));
 		return;
 	} 
-	// Already Invited
+	// Already invited
 	if (channel->hasInvited(*target)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 443 " + client.getNickname() + " " + targetNick +
-			" " + channelName + " :is already invited\r\n");
+		server.sendToClient(client.getFd(), Replies::alreadyInvited(client, targetNick, channelName));
 		return;
 	}
 
 	channel->handleInvite(client, *target);
 
-	// RPL_INVITING — Confirm to the invited
-	server.sendToClient(client.getFd(),
-		":ft_irc 341 " + client.getNickname() + " " + targetNick +
-		" " + channelName + "\r\n");
+	// Notifies the inviter that the invitation was sent
+	server.sendToClient(client.getFd(), Replies::inviting(client, targetNick, channelName));
 
-	// Notify to the invited
-	server.sendToClient(target->getFd(),
-		":" + client.getNickname() + "!" + client.getUsername() +
-		"@localhost INVITE " + targetNick + " :" + channelName + "\r\n");
+	// Notifies the invited user
+	server.sendToClient(target->getFd(), Replies::invite(client, targetNick, channelName));
 }
 
 /*****************************************
@@ -442,22 +370,20 @@ void CommandDispatcher::handleInvite(Server &server, Client &client, const Comma
  ****************************************/
 void CommandDispatcher::handlePart(Server &server, Client &client, const Command &cmd)
 {
-	// Check params
+	// Checks parameters
 	if (cmd.params.empty()) {
 		server.sendToClient(client.getFd(), Replies::needMoreParams(client, "PART"));
 		return;
 	}
 
-	// Check if channel exists
+	// Checks whether the channel exists
 	Channel* channel;
 	if (!(channel = channelExist(cmd.params[0], server, client)))
 		return;
 
-	// Check if client is member
+	// Checks whether the client is a member
 	if (!channel->hasMember(client)) {
-		server.sendToClient(client.getFd(),
-			":ft_irc 442 " + client.getNickname() + " " + cmd.params[0] +
-			" :You're not on that channel\r\n");
+		server.sendToClient(client.getFd(), Replies::notOnChannel(client, cmd.params[0]));
 		return;
 	}
 
@@ -465,45 +391,41 @@ void CommandDispatcher::handlePart(Server &server, Client &client, const Command
 	const std::string reason = (cmd.params.size() > 1) ? cmd.params[1] : "";
 
 	// Broadcast PART to everyone before leaving
-	std::string partMsg = ":" + client.getNickname() + "!" + client.getUsername()
-		+ "@localhost PART " + channel->getName();
-	if (!reason.empty())
-		partMsg += " :" + reason;
-	partMsg += "\r\n";
-	server.sendToChannel(*channel, partMsg);
+	if (reason.empty()) {
+    	server.sendToChannel(*channel, Replies::partMsg(client, channel->getName()));
+	}
+	else {
+    	server.sendToChannel(*channel, Replies::partReasonMsg(client, channel->getName(), reason));
+}
 
 	channel->handlePart(client);
 
-	// Choose new operator if channel turns orfan
+	// Assigns a new operator if the channel becomes orphaned
 	if (channel->getMembers().empty()) {
 		server.removeChannel(cmd.params[0]);
-	} else if (channel->getOperators().empty()) {
+	} 
+	else if (channel->getOperators().empty()) {
 		Client* newOp = *channel->getMembers().begin();
 		channel->addOperator(*newOp);
-		server.sendToChannel(*channel,
-			":ft_irc MODE " + channel->getName() +
-			" +o " + newOp->getNickname() + "\r\n");
+		server.sendToChannel(*channel, Replies::modeNewOperator(channel->getName(), newOp->getNickname()));
 	}
 }
 
-/****************************************************************************
- * Handles QUIT command.                                                    *
- * Broadcast message to every channel which has @param client and leaves it *
- ***************************************************************************/
+/*************************************************************************************
+ * Handles QUIT command.                                                             *
+ * Broadcast the quit message to every channel containing @param client and leaves it *
+ ************************************************************************************/
 void CommandDispatcher::handleQuit(Server &server, Client &client, const Command &cmd)
 {
 	const std::string reason = cmd.params.empty() ? "Client quit" : cmd.params[0];
 
-	const std::string quitMsg = ":" + client.getNickname() + "!" + client.getUsername()
-		+ "@localhost QUIT :" + reason + "\r\n";
+	const std::string quitMsg = Replies::quitMsg(client, reason);
 
 	// Notify every channel before parting
 	server.removeClientFromAllChannels(server, client, quitMsg);
 
-	// Confirsm to Client
-	server.sendToClient(client.getFd(),
-		":ft_irc ERROR :Closing Link: " + client.getNickname() +
-		" (" + reason + ")\r\n");
+	// Sends ERROR before disconnecting the client
+	server.sendToClient(client.getFd(), Replies::closingLinkMsg(client, reason));
 
 	// Disconnects from server
 	server.disconnectClientByFd(client.getFd());
