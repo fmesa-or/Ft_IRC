@@ -25,6 +25,10 @@ std::string Replies::passwordIncorrect() {
     return ":ft_irc 464 :Password incorrect\r\n";
 }
 
+std::string Replies::noticeWrongPassword(const std::string& nickname) {
+	return ":ft_irc NOTICE " + nickname + " :Incorrect channel key\r\n";
+}
+
 std::string Replies::alreadyRegistered(const Client &client) {
 	return ":ft_irc 462 " + client.getNickname() + " :You may not reregister\r\n";
 }

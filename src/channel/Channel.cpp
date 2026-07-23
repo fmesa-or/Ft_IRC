@@ -6,7 +6,7 @@
 /*   By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 18:09:04 by fmesa-or          #+#    #+#             */
-/*   Updated: 2026/07/23 18:36:10 by fmesa-or         ###   ########.fr       */
+/*   Updated: 2026/07/23 19:40:30 by fmesa-or         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -411,7 +411,8 @@ void	Channel::setKey(Server &server, Client &client, Command cmd) {
 		LOG_DEBUG("PASWORD ADDED: " << cmd.params[2]);
 	} else if (cmd.params[1][0] == '-') {
 		if (cmd.params[2] != _key) {
-			server.sendToClient(client.getFd(), Replies::passwordIncorrect());
+			LOG_DEBUG("Wrong PASWORD");
+			server.sendToClient(client.getFd(), Replies::noticeWrongPassword(client.getNickname()));
 			return;
 		} else {
 			_key = "";
