@@ -84,13 +84,3 @@ bool Client::getRegistrationCompleted() const {
 void Client::setRegistrationCompleted(bool value) {
 	_registration_completed = value;
 }
-
-// NOTE: Should we buffer client messages?
-// void Client::queueMessage(const std::string& message) {
-// 	_send_buffer += message;
-// }
-//
-// std::string& Client::getSendBuffer() {
-// 	return _send_buffer;
-// }
-

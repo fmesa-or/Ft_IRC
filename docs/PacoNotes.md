@@ -143,21 +143,19 @@ LIMIT Send Error: message to client when trying to acces a channel with limit al
 FIX PASS USER NICK				✅ (No need to fix, works as intended)
 
 # 2026/07/21
-Implement Replies::
-Check commented methods at RegistrationHandlers.cpp do we need them?
-Check notes at Client.cpp
-Check helpers.cpp. Can we name it with lower case?
-Remove comented includes in Server.cpp
-Check comments "FULL DISCONNECT LOGIC? from Server.cpp
+Implement Replies::														✅
+Check commented methods at RegistrationHandlers.cpp do we need them?	✅
+Check notes at Client.cpp												✅
+Check helpers.cpp. Can we name it with lower case?						✅
+Remove comented includes in Server.cpp									✅
+Check comments "FULL DISCONNECT LOGIC? from Server.cpp 					✅
 Check for bugs
 Check all files line by line											✅
 Check subject															✅ 
 Check correction sheet													✅ 
 Check fd leaks															✅
-Add Replies to addOperator and remove Opperator							
-Check addOperator and removeOpperator									
 
-COMPLETE README!!!! (at the end)
+COMPLETE README!!!! (at the end)										
 
 
 PONG is not needed!! (Ole Ole)✅ 

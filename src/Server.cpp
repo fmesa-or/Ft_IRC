@@ -12,7 +12,6 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <iostream>
-// #include <cctype>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -24,9 +23,6 @@
 #include <poll.h>
 #include <vector>
 #include <cerrno>
-// #include <sstream>
-
-// Server::Server() {}
 
 Server::Server(int port, const std::string& password) : _port(port), _password(password), _listen_fd(-1) {}
 
@@ -88,12 +84,10 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 
 			int flags = fcntl(client_fd, F_GETFL);
 			if (flags == -1) {
-				// FULL DISCONNECT LOGIC?
 				close(client_fd);
 				continue;
 			}
 			if (fcntl(client_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-				// FULL DISCONNECT LOGIC?
 				close(client_fd);
 				continue;
 			}
@@ -177,7 +171,7 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 
 	if (recv_buffer.size() > MAX_RECV_BUFFER_SIZE) {
 		disconnectClient(client.getFd(), pollfds_idx);
-		return; // ← añadir return, no seguir procesando
+		return;
 	}
 
 	int fd = client.getFd(); // Saves fd before process
@@ -194,7 +188,7 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 		Command command = parser.parseLine(message);
 		_dispatcher.dispatch(*this, client, command);
 
-		// Si el cliente fue desconectado durante el dispatch, parar
+		// Stops if client disconects meanwhile dispatch.
 		if (_clients.find(fd) == _clients.end())
 			return;
 	}

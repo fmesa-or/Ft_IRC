@@ -61,7 +61,7 @@ void CommandDispatcher::handleNotice(Server &server, Client &client, const Comma
 		for (std::set<Client *>::const_iterator it =  broadcast->getMembers().begin(); it != broadcast->getMembers().end(); it++) {
 			Client *member = *it;
 			if (member != &client) {
-				server.sendToClient(member->getFd(), Replies::notice(client, target, text));
+				server.sendToClient(member->getFd(), Replies::noticeMsg(client, target, text));
 			}
 		}
 	}
@@ -69,6 +69,6 @@ void CommandDispatcher::handleNotice(Server &server, Client &client, const Comma
 		Client *receiver = server.findClientByNick(target);
 			if (!receiver)
 				return ;
-		server.sendToClient(receiver->getFd(), Replies::notice(client, target, text));
+		server.sendToClient(receiver->getFd(), Replies::noticeMsg(client, target, text));
 	}
 }
