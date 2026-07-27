@@ -146,13 +146,15 @@ Use `Ctrl+D` to send commands in separate packets (simulating low bandwidth or p
 
 ```
 ft_irc/
-├── docs/
-│   ├── en.subject.ft_irc.pdf  # Project subject
-│   └── guideResume.txt        # Quick reference guide
 ├── include/
 │   └── [Header files]         # Project headers (to be created)
 ├── src/
-│   └── [Source files]         # Implementation files (to be created)
+│   ├── channel/
+│   ├── dispatcher/
+│   ├── handlers/
+│   ├── parser/
+│   ├── replies/
+│   └── [Source files]         # Implementation files
 ├── Makefile                   # Build configuration
 └── README.md                  # This file
 ```
@@ -175,6 +177,7 @@ ft_irc/
 ### AI Usage
 
 - Used to refine the README.
+- Used to check number codes for Server-Client comunication.
 
 ---
 <!--
@@ -221,8 +224,8 @@ ft_irc/
 
 ## Notes
 
-- docs/ content is added even though the subject does not mention it. That's for development purposes. Do NOT submit!
 <!--
+- docs/ content is added even though the subject does not mention it. That's for development purposes. Do NOT submit!
 - Remember to aggregate received packets to rebuild complete commands
 - Handle commands that arrive in multiple parts (see Testing section)
 - Implement proper error codes as per RFC 1459

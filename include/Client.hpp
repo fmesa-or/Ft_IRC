@@ -34,6 +34,9 @@ public:
 
 	bool isRegistered() const;
 
+	bool getRegistrationCompleted() const;
+	void setRegistrationCompleted(bool value);
+
 	/* Incoming data */
 
 	std::string& getRecvBuffer();
@@ -54,6 +57,7 @@ private:
 	bool        _has_password;
 	bool        _has_nickname;
 	bool        _has_username;
+	bool		_registration_completed;
 
 	std::string _recv_buffer;
 	// std::string _send_buffer;

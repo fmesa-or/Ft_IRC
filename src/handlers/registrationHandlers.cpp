@@ -10,6 +10,7 @@
 /* ************************************************************************** */
 
 void CommandDispatcher::handlePass(Server &server, Client &client, const Command &cmd) {
+	LOG_DEBUG("HandlePass invoked");
 	if (client.isRegistered()) {
 		server.sendToClient(client.getFd(), Replies::alreadyRegistered(client));
 		return;
@@ -25,8 +26,7 @@ void CommandDispatcher::handlePass(Server &server, Client &client, const Command
     }
 
     client.setHasPassword(true);
-
-   // tryRegister(server, client);
+	server.completeClientRegistration(client);
 }
 
 void CommandDispatcher::handleNick(Server &server, Client &client, const Command &cmd) {
@@ -46,8 +46,7 @@ void CommandDispatcher::handleNick(Server &server, Client &client, const Command
 
     client.setNickname(nick);
     client.setHasNickname(true);
-
-   // tryRegister(server, client);
+	server.completeClientRegistration(client);
 }
 
 void CommandDispatcher::handleUser(Server &server, Client &client, const Command &cmd) {
@@ -61,21 +60,5 @@ void CommandDispatcher::handleUser(Server &server, Client &client, const Command
     }
     client.setUsername(cmd.params[0]);
     client.setHasUsername(true);
-
-    //tryRegister(server, client);
+	server.completeClientRegistration(client);
 }
-
-/*void CommandDispatcher::tryRegister(Server &server, Client &client) {
-	if (client.isRegistered())
-		return;
-	if (!client.hasPassword())
-		return;
-	if (!client.hasNickname())
-		return;
-	if (!client.hasUsername())
-        return;
-
-    client.setRegistered(true);
-
-    server.sendToClient(client, Replies::welcome(client));
-}*/

@@ -4,8 +4,9 @@
 # include <string>
 # include <set>
 # include <iostream>
+# include "Command.hpp"
 
-
+class Server;
 class Client;
 
 class Channel
@@ -16,14 +17,14 @@ private:
 	std::string			_topic;
 
 	std::set<Client*>	_members;
-	std::set<Client*>	_operators;
+	std::set<Client*>	_operators;	// +o
 
-	std::string			_key;		//+k
-	std::set<Client*>	_invited;	//+i
+	std::string			_key;		// +k
+	std::set<Client*>	_invited;
 
-	bool				_inviteOnly;
-	bool				_topicRestricted;
-	size_t				_userLimit;	//+l | 0 = Limitless
+	bool				_inviteOnly;	// +i
+	bool				_topicRestricted;	// +t
+	size_t				_userLimit;	// +l | 0 = Limitless
 
 	/* Templates */
 	template <typename Container>
@@ -53,8 +54,8 @@ public:
 
 	/* Operators */
 
-	void	addOperator(Client& client);
-	void	removeOperator(Client& client);
+	bool	addOperator(Client& client);
+	bool	removeOperator(Client& client);
 	bool	isOperator(const Client& client) const;
 	const std::set<Client*>&	getOperators() const;
 
@@ -65,20 +66,23 @@ public:
 	const	std::set<Client*>&	getInvited() const;
 
 	/* Channel Support */
-	bool	canJoin(const Client& client, const std::string& key) const;
-	void	handleJoin(Client& client, const std::string& key);  // El primer usuario que crea el canal debe ser operador.
-	void	handleJoin(Client& client); // Overload
+	bool	canJoin(Server& server, const Client& client, const std::string& key) const;
+	bool	handleJoin(Server& server, Client& client, const std::string& key);  // El primer usuario que crea el canal debe ser operador.
+	bool	handleJoin(Server& server, Client& client); // Overload
 	void	handlePart(Client& client);
 	void	handleKick(Client& kicker, Client& target);
 	void	handleInvite(Client& inviter, Client& invited);
+	void	handleOperatorinator(Server& server, Client& client, Command cmd);
+
+	/* Channel Modes */
+	void	setTopic(std::string topic);
+	void	setInvitedOnly(Server& server, Client& client, Command cmd);
+	void	setTopicRestricted(Server& server, Client& client, Command cmd);
+	void	setKey(Server &server, Client &client, Command cmd);
+	void	setUserLimit(Server &server, Client &client, Command cmd);
 
 	/* Setters & Getters */
 	void	setName(std::string name);
-	void	setTopic(std::string topic);
-	void	setKey(const std::string key);
-	void	setInvitedOnly(bool inviteOnly);
-	void	setTopicRestricted(bool topicRestricted);
-	void	setUserLimit(size_t userLimit);
 
 	std::string&	getTopic();
 	std::string&	getKey();

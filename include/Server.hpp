@@ -27,7 +27,13 @@ public:
 
 	/* Channel lookup */
 
-	Channel* findChannel(const std::string& name);
+	Channel*	findChannel(const std::string& name);
+	Channel*	addChannel(const std::string& name);
+	void		removeChannel(const std::string& name);
+	void		removeClientFromAllChannels(Server& server, Client& client, const std::string& quitMsg);
+	void		disconnectClientByFd(int fd);
+
+
 
 	/* Outgoing communication */
 
@@ -37,6 +43,8 @@ public:
 	const std::string& getPassword() const;
 
 	void cleanup();
+
+	void completeClientRegistration(Client &client);
 
 private:
 

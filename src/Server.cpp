@@ -5,13 +5,13 @@
 #include "Command.hpp"
 #include "CommandDispatcher.hpp"
 #include "Parser.hpp"
+#include "Replies.hpp"
 
 #include <sys/socket.h>
 #include <cstring>
 #include <stdint.h>
 #include <cstdlib>
 #include <iostream>
-// #include <cctype>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -23,11 +23,8 @@
 #include <poll.h>
 #include <vector>
 #include <cerrno>
-// #include <sstream>
 
-// Server::Server() {}
-
-Server::Server(int port, const std::string& password) : _port(port), _password(password) {}
+Server::Server(int port, const std::string& password) : _port(port), _password(password), _listen_fd(-1) {}
 
 const std::string& Server::getPassword() const {
 	return _password;
@@ -37,12 +34,32 @@ void Server::sendToClient(int fd, const std::string& message) {
 	send(fd, message.c_str(), message.size(), 0);
 }
 
-void Server::sendToChannel(const Channel& channel, const std::string& message) {
-	TODO();
-	(void)channel;
-	(void)message;
+/****************************************
+* SEND TO CHANNEL: broadcast to members *
+****************************************/
+void	Server::sendToChannel(const Channel& channel, const std::string& message) {
+	const std::set<Client*> &members = channel.getMembers();
+	for (std::set<Client*>::const_iterator it = members.begin(); it != members.end(); ++it) {
+		if (*it != NULL) {
+			sendToClient((*it)->getFd(), message);
+		}
+	}
 }
 
+ /******************************************************************************
+ * Accepts and registers all pending client connections on @param listening_fd *
+ *.                                                                            *
+ * Loops until no more connections are pending (EAGAIN / EWOULDBLOCK).         *
+ *                                                                             *
+ * For each new connection:                                                    *
+ *  - Retrieves the client IP address.                                         *
+ *  - Sets TCP_NODELAY to disable Nagle's algorithm.                           *
+ *  - Sets the socket to non-blocking mode with O_NONBLOCK.                    *
+ *  - Registers the client fd in @param pollfds for POLLIN events.             *
+ *  - Creates and stores a new Client object in @param _clients.               *
+ *                                                                             *
+ * If setting non-blocking mode fails, the client fd is closed and skipped.    *
+ ******************************************************************************/
 void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 	while (true) {
 		sockaddr_in client_address;
@@ -67,12 +84,10 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 
 			int flags = fcntl(client_fd, F_GETFL);
 			if (flags == -1) {
-				// FULL DISCONNECT LOGIC?
 				close(client_fd);
 				continue;
 			}
 			if (fcntl(client_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
-				// FULL DISCONNECT LOGIC?
 				close(client_fd);
 				continue;
 			}
@@ -88,6 +103,15 @@ void Server::registerClients(int listening_fd, std::vector<pollfd> &pollfds) {
 			LOG_DEBUG("Client connected from " << ip_string);
 		}
 	}
+}
+
+void Server::completeClientRegistration(Client &client) {
+	if (!client.isRegistered())
+		return;
+	if (client.getRegistrationCompleted())
+		return;
+	client.setRegistrationCompleted(true);
+	sendToClient(client.getFd(), Replies::welcome(client));
 }
 
 bool Server::disconnectClient(int fd, size_t pollfds_idx) {
@@ -147,7 +171,10 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 
 	if (recv_buffer.size() > MAX_RECV_BUFFER_SIZE) {
 		disconnectClient(client.getFd(), pollfds_idx);
+		return;
 	}
+
+	int fd = client.getFd(); // Saves fd before process
 
 	size_t line_end_position = 0;
 	while ((line_end_position = recv_buffer.find("\r\n")) != std::string::npos) {
@@ -160,6 +187,10 @@ void Server::processClientBuffer(Client &client, char buffer[BUFFER_SIZE], ssize
 		Parser parser;
 		Command command = parser.parseLine(message);
 		_dispatcher.dispatch(*this, client, command);
+
+		// Stops if client disconects meanwhile dispatch.
+		if (_clients.find(fd) == _clients.end())
+			return;
 	}
 }
 
@@ -198,6 +229,12 @@ void Server::continuouslyPollSockets(int listening_fd) {
 					ERROR("Listening socket failed.");
 					return;
 				} else {
+					Client* client = findClientByFd(fd);
+					if (client) {
+						const std::string quitMsg = ":" + client->getNickname() + "!" 
+							+ client->getUsername() + "@localhost QUIT :Connection lost\r\n";
+						removeClientFromAllChannels(*this, *client, quitMsg);
+					}
 					disconnected = disconnectClient(fd, idx);
 				}
 			} else if ((revents & POLLIN) != 0) {
@@ -215,11 +252,23 @@ void Server::continuouslyPollSockets(int listening_fd) {
 						Client& client = _clients[fd];
 						processClientBuffer(client, buffer, bytes_received, idx);
 					} else if (bytes_received == 0) {
+						Client* client = findClientByFd(fd);
+						if (client) {
+							const std::string quitMsg = ":" + client->getNickname() + "!"
+								+ client->getUsername() + "@localhost QUIT :Connection closed\r\n";
+							removeClientFromAllChannels(*this, *client, quitMsg);
+						}
 						disconnected = disconnectClient(fd, idx);
 					} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
 						continue;
 					} else {
 						ERROR("recv error from client " << fd << ".");
+						Client* client = findClientByFd(fd);
+						if (client) {
+							const std::string quitMsg = ":" + client->getNickname() + "!"
+								+ client->getUsername() + "@localhost QUIT :Read error\r\n";
+							removeClientFromAllChannels(*this, *client, quitMsg);
+						}
 						disconnected = disconnectClient(fd, idx);
 					}
 				}
@@ -266,9 +315,84 @@ void Server::cleanup() {
 	_listen_fd = -1;
 }
 
+/***********************************************************
+ * Returns a channel from the map container.               *
+ * If it doesn't find it or the map is empty returns NULL. *
+ **********************************************************/
 Channel* Server::findChannel(const std::string& name) {
-	TODO();
-	(void)name;
+	std::map<std::string, Channel>::iterator it = _channels.find(name);
+
+	if (it == _channels.end())
+		return NULL;
+	return &it->second;
+	
+}
+
+/******************************************************
+ * Adds a new channel in the map container _channels. *
+ *****************************************************/
+Channel*	Server::addChannel(const std::string& name) {
+	Channel* target = findChannel(name);
+	if (target)
+		return target;
+
+	std::pair<std::map<std::string, Channel>::iterator, bool> inserted =
+		_channels.insert(std::make_pair(name, Channel(name)));
+
+		return &inserted.first->second;
+}
+
+/**************************************************
+ * Removes a channel from map container _channels *
+ *************************************************/
+void Server::removeChannel(const std::string& name) {
+	if (_channels.find(name) == _channels.end()) {
+		LOG_DEBUG("removeChannel: channel " << name << " not found");
+		return;
+	}
+	_channels.erase(name);
+	LOG_DEBUG("Channel " << name << " removed");
+}
+
+/**********************************************
+ * Removes a single Client from every channel *
+ *********************************************/
+void Server::removeClientFromAllChannels(Server& server, Client& client, const std::string& quitMsg) {
+	std::vector<std::string> emptyChannels;
+
+	for (std::map<std::string, Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		Channel& channel = it->second;
+		if (channel.hasMember(client)) {
+			sendToChannel(channel, quitMsg);
+			channel.handlePart(client);
+			// Stores all empty channels
+			if (channel.getMembers().empty()) {
+				emptyChannels.push_back(it->first);
+			} else if (channel.getOperators().empty()) {
+				Client* newOp = *channel.getMembers().begin();
+				channel.addOperator(*newOp);
+				server.sendToChannel(channel,
+					":ft_irc MODE " + channel.getName() +
+					" +o " + newOp->getNickname() + "\r\n"); // ← newOp, no client
+			}
+		}
+	}
+	// Remove empty channels
+	for (size_t i = 0; i < emptyChannels.size(); i++)
+		removeChannel(emptyChannels[i]);
+
+}
+
+/**********************************
+ * Disconnects Client from Server *
+ *********************************/
+void Server::disconnectClientByFd(int fd) {
+	for (size_t i = 0; i < _pollfds.size(); i++) {
+		if (_pollfds[i].fd == fd) {
+			disconnectClient(fd, i);
+			return;
+		}
+	}
 }
 
 void Server::flushClientMessages(Client& client) {

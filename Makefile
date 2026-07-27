@@ -6,7 +6,7 @@
 #    By: fmesa-or <fmesa-or@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/28 17:42:13 by fmesa-or          #+#    #+#              #
-#    Updated: 2026/07/10 17:19:35 by fmesa-or         ###   ########.fr        #
+#    Updated: 2026/07/23 17:51:10 by fmesa-or         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,18 +27,18 @@ CLEAN = rm -f
 SRC_DIR = src
 SRC = \
 	src/dispatcher/CommandDispatcher.cpp \
-	src/handlers/ChannelHandlers.cpp \
-	src/handlers/HandlerRegistry.cpp \
-	src/handlers/MsgHandlers.cpp \
-	src/handlers/ProtocolHandlers.cpp \
-	src/handlers/RegistrationHandlers.cpp \
+	src/handlers/channelHandlers.cpp \
+	src/handlers/handlerRegistry.cpp \
+	src/handlers/msgHandlers.cpp \
+	src/handlers/protocolHandlers.cpp \
+	src/handlers/registrationHandlers.cpp \
 	src/parser/Parser.cpp \
 	src/replies/Replies.cpp \
 	src/Client.cpp \
 	src/helpers.cpp \
 	src/main.cpp \
 	src/Server.cpp \
-	src/Channel/Channel.cpp
+	src/channel/Channel.cpp
 
 #Objects
 OBJ_DIR = obj
@@ -63,19 +63,19 @@ $(NAME): $(OBJ)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	@printf "\r$(COLOR_INFO)Building $(NAME)... [%s]$(COLOR_RESET)" $(notdir $<)
+	@printf "\r\033[K$(COLOR_INFO)Building $(NAME)... [%s]$(COLOR_RESET)" $(notdir $<)
 	@$(CC) $(CPPFLAGS) -c $< -o $@ $(HEADERS)
 
 
 clean:
 	@printf "$(COLOR_INFO)Cleaning object files...$(COLOR_RESET)"
 	@$(CLEAN) -r $(OBJ_DIR)
-	@printf "\r$(COLOR_SUCCESS)✅ Object files cleaned successfully!$(COLOR_RESET)\n"
+	@printf "\r\033[K$(COLOR_SUCCESS)✅ Object files cleaned successfully!$(COLOR_RESET)\n"
 
 fclean: clean
 	@printf "$(COLOR_INFO)Deleting $(NAME)...$(COLOR_RESET)"
 	@$(CLEAN) $(NAME)
-	@printf "\r$(COLOR_SUCCESS)✅ $(NAME) deleted successfully!$(COLOR_RESET)\n"
+	@printf "\r\033[K$(COLOR_SUCCESS)✅ $(NAME) deleted successfully!$(COLOR_RESET)\n"
 
 re: fclean $(NAME)
 
