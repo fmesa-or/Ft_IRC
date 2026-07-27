@@ -10,7 +10,7 @@
 #define TERMINAL_COLOR_RESET "\033[0m"
 
 #define ERROR(x) (std::cerr << TERMINAL_COLOR_RED "ERROR: " TERMINAL_COLOR_RESET << x << std::endl, false)
-#define LOG_DEBUG(x) (std::cerr << TERMINAL_COLOR_YELLOW "DEBUG: " TERMINAL_COLOR_RESET << x << std::endl)
+#define LOG_DEBUG(x) (std::cerr << TERMINAL_COLOR_YELLOW "SERVER: " TERMINAL_COLOR_RESET << x << std::endl)
 #define LOG(x) (std::cerr << x << std::endl)
 
 # include <iostream>

@@ -248,7 +248,7 @@ void Server::continuouslyPollSockets(int listening_fd) {
 
 					if (bytes_received > 0) {
 						std::string text_received(buffer, bytes_received);
-						LOG_DEBUG("client (fd) " << fd << ": " << text_received);
+						LOG_DEBUG("client (fd) " << fd << ":\n" << text_received);
 						Client& client = _clients[fd];
 						processClientBuffer(client, buffer, bytes_received, idx);
 					} else if (bytes_received == 0) {
