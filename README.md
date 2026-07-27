@@ -21,7 +21,7 @@ The README.md must include at least:
 
 <div align="center">
 
-*This project has been created as part of the 42 curriculum by [**crmorale**](https://github.com/Crmorale) and [**fmesa-or**](https://github.com/fmesa-or)*
+*This project has been created as part of the 42 curriculum by [**crmorale**](https://github.com/Crmorale), [**fmesa-or**](https://github.com/fmesa-or) and [**cargonz2**](https://github.com/Charlie-Steer)*
 
 ---
 
